@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 
 // BaseUI and Styletron setup
-import { StyletronProvider } from "baseui";
+import { Provider as StyletronProvider } from "styletron-react";
 import { BaseProvider, LightTheme } from "baseui";
 import { Client } from "styletron-engine-atomic";
 
