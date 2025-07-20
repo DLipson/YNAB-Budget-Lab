@@ -1,11 +1,11 @@
 // Unit tests for [`parseCategoryName()`](src/utils/categoryParser.ts:3)
 
-import { parseCategoryName } from "./categoryParser";
+import { parseCategoryGroupName } from "./categoryParser";
 
-describe("parseCategoryName", () => {
+describe("parseCategoryGroupName", () => {
   it("parses valid format", () => {
-    expect(parseCategoryName("Monthly:High:Fixed")).toEqual({
-      name: "Monthly:High:Fixed",
+    expect(parseCategoryGroupName("Monthly:High:Fixed")).toEqual({
+      category_group_name: "Monthly:High:Fixed",
       frequency: "Monthly",
       priority: "High",
       type: "Fixed",
@@ -13,50 +13,50 @@ describe("parseCategoryName", () => {
   });
 
   it("trims whitespace in valid format", () => {
-    expect(parseCategoryName("  Weekly : Low : Variable ")).toEqual({
-      name: "  Weekly : Low : Variable ",
+    expect(parseCategoryGroupName("  Weekly : Low : Variable ")).toEqual({
+      category_group_name: "  Weekly : Low : Variable ",
       frequency: "Weekly",
       priority: "Low",
       type: "Variable",
     });
   });
 
-  it("returns name only for invalid format (too few parts)", () => {
-    expect(parseCategoryName("Monthly:High")).toEqual({
-      name: "Monthly:High",
+  it("returns group name only for invalid format (too few parts)", () => {
+    expect(parseCategoryGroupName("Monthly:High")).toEqual({
+      category_group_name: "Monthly:High",
     });
   });
 
-  it("returns name only for invalid format (too many parts)", () => {
-    expect(parseCategoryName("A:B:C:D")).toEqual({
-      name: "A:B:C:D",
+  it("returns group name only for invalid format (too many parts)", () => {
+    expect(parseCategoryGroupName("A:B:C:D")).toEqual({
+      category_group_name: "A:B:C:D",
     });
   });
 
-  it("returns name only for empty string", () => {
-    expect(parseCategoryName("")).toEqual({
-      name: "",
+  it("returns group name only for empty string", () => {
+    expect(parseCategoryGroupName("")).toEqual({
+      category_group_name: "",
     });
   });
 
-  it("returns name only for non-string input", () => {
-    expect(parseCategoryName(null as unknown as string)).toEqual({
-      name: "null",
+  it("returns group name only for non-string input", () => {
+    expect(parseCategoryGroupName(null as unknown as string)).toEqual({
+      category_group_name: "null",
     });
-    expect(parseCategoryName(123 as unknown as string)).toEqual({
-      name: "123",
+    expect(parseCategoryGroupName(123 as unknown as string)).toEqual({
+      category_group_name: "123",
     });
   });
 
-  it("returns name only if any part is empty", () => {
-    expect(parseCategoryName("Monthly::Fixed")).toEqual({
-      name: "Monthly::Fixed",
+  it("returns group name only if any part is empty", () => {
+    expect(parseCategoryGroupName("Monthly::Fixed")).toEqual({
+      category_group_name: "Monthly::Fixed",
     });
-    expect(parseCategoryName(":High:Fixed")).toEqual({
-      name: ":High:Fixed",
+    expect(parseCategoryGroupName(":High:Fixed")).toEqual({
+      category_group_name: ":High:Fixed",
     });
-    expect(parseCategoryName("Monthly:High:")).toEqual({
-      name: "Monthly:High:",
+    expect(parseCategoryGroupName("Monthly:High:")).toEqual({
+      category_group_name: "Monthly:High:",
     });
   });
 });
