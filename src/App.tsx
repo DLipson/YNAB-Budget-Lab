@@ -1,11 +1,16 @@
-import "./App.css";
+import { Block } from "baseui/block";
+import { Heading } from "baseui/heading";
 
 function App() {
   return (
-    <div className="app-shell">
-      <header className="app-header">YNAB Budget Lab</header>
-      <main className="app-main">{/* Main content area */}</main>
-    </div>
+    <Block>
+      <Block>
+        <Heading level={3} margin="scale600">
+          YNAB Budget Lab
+        </Heading>
+      </Block>
+      <Block as="main">{/* Main content area */}</Block>
+    </Block>
   );
 }
 
