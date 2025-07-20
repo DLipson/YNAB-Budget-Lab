@@ -9,7 +9,6 @@ import { CategoryTable } from "./components/CategoryTable";
 import { useCategoryFilter } from "./hooks/useCategoryFilter";
 import { useState } from "react";
 
-// Mock category data
 import type { Category } from "./types/ynab";
 
 const mockCategories: Category[] = [
@@ -64,14 +63,11 @@ const mockCategories: Category[] = [
 ];
 
 function App() {
-  // Filter and sort state
   const [filterState] = useState({});
   const [sortState] = useState<{ key: string; direction: "asc" | "desc" }>({ key: "name", direction: "asc" });
 
-  // Loading state for demonstration
   const [loading, setLoading] = useState(true);
 
-  // Connect filter/sort to hook
   const filteredCategories = useCategoryFilter({
     categories: mockCategories,
     filterState,

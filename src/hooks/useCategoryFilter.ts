@@ -1,5 +1,3 @@
-// src/hooks/useCategoryFilter.ts
-
 import { useMemo } from "react";
 import type { Category } from "../types/ynab";
 import { parseCategoryGroupName } from "../utils/categoryParser";
@@ -27,11 +25,9 @@ export function useCategoryFilter({ categories, filterState, sortState }: UseCat
   return useMemo(() => {
     let filtered = categories;
 
-    // Apply filters (AND logic)
     if (filterState) {
       filtered = filtered.filter((cat) =>
         Object.entries(filterState).every(([key, value]) => {
-          // Support filtering by segments in category_group_name
           if (key === "frequency" || key === "priority" || key === "type") {
             const parsed = parseCategoryGroupName(cat.category_group_name);
             return parsed[key] === value;
@@ -41,13 +37,11 @@ export function useCategoryFilter({ categories, filterState, sortState }: UseCat
       );
     }
 
-    // Apply sorting
     if (sortState && sortState.key) {
       filtered = [...filtered].sort((a, b) => {
         let aVal = a[sortState.key];
         let bVal = b[sortState.key];
 
-        // Support sorting by segments in category_group_name
         if (sortState.key === "frequency" || sortState.key === "priority" || sortState.key === "type") {
           if (sortState.key === "frequency" || sortState.key === "priority" || sortState.key === "type") {
             const aParsed = parseCategoryGroupName(a.category_group_name);

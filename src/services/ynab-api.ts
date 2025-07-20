@@ -1,4 +1,3 @@
-// src/services/ynab-api.ts
 import { YNAB_API_BASE_URL, getYnabApiHeaders } from "../config/api";
 import type { YnabApiResponse } from "../types/ynab";
 import type { BudgetSummary } from "../types/ynab";
@@ -13,12 +12,11 @@ let requestCount = 0;
 let windowStart = Date.now();
 
 const MAX_REQUESTS_PER_HOUR = 200;
-const WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const WINDOW_MS = 60 * 60 * 1000;
 
 export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const now = Date.now();
   if (now - windowStart >= WINDOW_MS) {
-    // Reset window
     windowStart = now;
     requestCount = 0;
   }
@@ -31,7 +29,6 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
   const headers = { ...getYnabApiHeaders(), ...options.headers };
 
   if (process.env.NODE_ENV === "development") {
-    // Minimal request logging
     console.log("[YNAB API] Request:", {
       method: options.method || "GET",
       url,
@@ -64,7 +61,6 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
   }
 
   if (process.env.NODE_ENV === "development") {
-    // Minimal response logging
     const cloned = response.clone();
     let responseBody: unknown;
     try {
