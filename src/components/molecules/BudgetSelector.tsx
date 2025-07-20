@@ -1,4 +1,6 @@
 import React from "react";
+import { Block } from "baseui/block";
+import { Select } from "baseui/select";
 
 export type Budget = {
   id: string;
@@ -21,46 +23,65 @@ export const BudgetSelector: React.FC<BudgetSelectorProps> = ({
   loading = false,
   error = null,
 }) => {
+  const options = budgets.map((budget) => ({
+    id: budget.id,
+    label: budget.name,
+    budget,
+  }));
+
+  const selectedOption = options.find((opt) => opt.id === selectedBudgetId) || null;
+
   if (loading) {
-    return <div aria-busy="true">Loading budgets...</div>;
+    return (
+      <Block aria-busy="true" color="mono700">
+        Loading budgets...
+      </Block>
+    );
   }
   if (error) {
     return (
-      <div role="alert" style={{ color: "red" }}>
+      <Block role="alert" color="negative">
         Error: {error}
-      </div>
+      </Block>
     );
   }
-  const selectedBudget = selectedBudgetId != null ? budgets.find((b) => b.id === selectedBudgetId) : null;
 
   return (
-    <div>
-      <select
-        value={selectedBudgetId ?? ""}
-        onChange={(e) => onSelect(e.target.value)}
-        aria-label="Select budget"
+    <Block>
+      <Select
+        options={options}
+        value={selectedOption ? [selectedOption] : []}
+        placeholder="Select a budget"
+        onChange={({ value }) => {
+          if (value && value[0]) {
+            if (typeof value[0].id === "string") {
+              onSelect(value[0].id);
+            }
+          }
+        }}
+        isLoading={loading}
+        clearable={false}
         disabled={loading}
-      >
-        <option value="" disabled>
-          Select a budget
-        </option>
-        {budgets.map((budget) => (
-          <option key={budget.id} value={budget.id}>
-            {budget.name}
-          </option>
-        ))}
-      </select>
-      {selectedBudget && (
-        <div style={{ marginTop: "1em", fontSize: "0.95em" }}>
-          <div>
-            <strong>Name:</strong> {selectedBudget.name}
-          </div>
-          <div>
+        overrides={{
+          Dropdown: { style: { zIndex: 1000 } },
+        }}
+        labelKey="label"
+        valueKey="id"
+        size="compact"
+      />
+      {selectedOption && (
+        <Block marginTop="scale500" font="font300">
+          <Block>
+            <strong>Name:</strong> {selectedOption.label}
+          </Block>
+          <Block>
             <strong>Last Modified:</strong>{" "}
-            {selectedBudget.last_modified_on ? new Date(selectedBudget.last_modified_on).toLocaleString() : "Unknown"}
-          </div>
-        </div>
+            {selectedOption.budget.last_modified_on
+              ? new Date(selectedOption.budget.last_modified_on).toLocaleString()
+              : "Unknown"}
+          </Block>
+        </Block>
       )}
-    </div>
+    </Block>
   );
 };
