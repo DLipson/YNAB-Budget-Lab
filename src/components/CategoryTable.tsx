@@ -11,6 +11,7 @@ interface CategoryTableProps {
   isLoading?: boolean;
   error?: string | null;
   filterActive?: boolean;
+  onRetry?: () => void;
 }
 
 export function CategoryTable({
@@ -18,6 +19,7 @@ export function CategoryTable({
   isLoading = false,
   error = null,
   filterActive = false,
+  onRetry,
 }: CategoryTableProps) {
   const columns = ["Category Name", "Amount", "Frequency", "Priority", "Type"];
 
@@ -47,7 +49,26 @@ export function CategoryTable({
   }
 
   if (error) {
-    return <div style={{ color: "red", padding: "1rem" }}>Error loading categories: {error}</div>;
+    return (
+      <div style={{ color: "red", padding: "1rem" }}>
+        Error loading categories: {error}
+        <br />
+        <button
+          style={{
+            marginTop: "0.5rem",
+            padding: "0.5rem 1rem",
+            background: "#e53e3e",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+          onClick={() => typeof onRetry === "function" && onRetry()}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   if (categories.length === 0) {

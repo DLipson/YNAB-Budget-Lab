@@ -40,13 +40,23 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
     });
   }
 
-  let response: Response;
-  try {
-    response = await fetch(url, { ...options, headers });
-  } catch (err) {
-    throw new Error(
-      `Network error while contacting YNAB API: ${err instanceof Error && err.message ? err.message : String(err)}`
-    );
+  let response: Response | undefined = undefined;
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      response = await fetch(url, { ...options, headers });
+      break;
+    } catch (err) {
+      lastError = new Error(
+        `Network error while contacting YNAB API: ${err instanceof Error && err.message ? err.message : String(err)}`
+      );
+      if (attempt === 0) {
+        await new Promise((res) => setTimeout(res, 1000)); // Wait 1s before retry
+      }
+    }
+  }
+  if (!response) {
+    throw lastError || new Error("Unknown error during YNAB API request.");
   }
   if (!response.ok) {
     const errorText = await response.text();
