@@ -19,8 +19,10 @@ export function useAuth() {
       });
       setApiKey(key);
       setIsAuthenticated(true);
-    } catch (err: any) {
-      setError(err.message || "Invalid API key");
+    } catch (err: unknown) {
+      const errorMsg =
+        err && typeof err === "object" && "message" in err ? (err as { message?: string }).message : "Invalid API key";
+      setError(errorMsg || "Invalid API key");
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
