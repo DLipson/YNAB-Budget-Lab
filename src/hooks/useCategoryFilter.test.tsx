@@ -1,7 +1,26 @@
 // src/hooks/useCategoryFilter.test.ts
-import { renderHook } from "@testing-library/react-hooks";
+import { render } from "@testing-library/react";
 import { useCategoryFilter } from "./useCategoryFilter";
 import type { Category } from "../types/ynab";
+
+function TestHook<T>(props: { hook: () => T; onResult: (result: T) => void }) {
+  const result = props.hook();
+  props.onResult(result);
+  return <></>;
+}
+
+function runHook<T>(hook: () => T) {
+  let hookResult: T | undefined;
+  render(
+    <TestHook
+      hook={hook}
+      onResult={(r) => {
+        hookResult = r;
+      }}
+    />
+  );
+  return hookResult!;
+}
 
 const categories: Category[] = [
   { id: "1", name: "Groceries", category_group_id: "g1", budgeted: 100, activity: 50, balance: 50 },
@@ -12,74 +31,66 @@ const categories: Category[] = [
 
 describe("useCategoryFilter", () => {
   it("returns all categories when no filter or sort", () => {
-    const { result } = renderHook(() => useCategoryFilter({ categories }));
-    expect(result.current).toHaveLength(4);
+    const result = runHook(() => useCategoryFilter({ categories }));
+    expect(result).toHaveLength(4);
   });
 
   it("filters by single field", () => {
-    const { result } = renderHook(() => useCategoryFilter({ categories, filterState: { category_group_id: "g1" } }));
-    expect(result.current.map((c) => c.name)).toEqual(["Groceries", "Utilities"]);
+    const result = runHook(() => useCategoryFilter({ categories, filterState: { category_group_id: "g1" } }));
+    expect(result.map((c) => c.name)).toEqual(["Groceries", "Utilities"]);
   });
 
   it("filters by multiple fields (AND logic)", () => {
-    const { result } = renderHook(() =>
+    const result = runHook(() =>
       useCategoryFilter({ categories, filterState: { category_group_id: "g1", balance: 50 } })
     );
-    expect(result.current.map((c) => c.name)).toEqual(["Groceries", "Utilities"]);
+    expect(result.map((c) => c.name)).toEqual(["Groceries", "Utilities"]);
   });
 
   it("returns empty array if no match", () => {
-    const { result } = renderHook(() => useCategoryFilter({ categories, filterState: { name: "Nonexistent" } }));
-    expect(result.current).toEqual([]);
+    const result = runHook(() => useCategoryFilter({ categories, filterState: { name: "Nonexistent" } }));
+    expect(result).toEqual([]);
   });
 
   it("sorts by string field ascending", () => {
-    const { result } = renderHook(() =>
-      useCategoryFilter({ categories, sortState: { key: "name", direction: "asc" } })
-    );
-    expect(result.current.map((c) => c.name)).toEqual(["Fun", "Groceries", "Rent", "Utilities"]);
+    const result = runHook(() => useCategoryFilter({ categories, sortState: { key: "name", direction: "asc" } }));
+    expect(result.map((c) => c.name)).toEqual(["Fun", "Groceries", "Rent", "Utilities"]);
   });
 
   it("sorts by string field descending", () => {
-    const { result } = renderHook(() =>
-      useCategoryFilter({ categories, sortState: { key: "name", direction: "desc" } })
-    );
-    expect(result.current.map((c) => c.name)).toEqual(["Utilities", "Rent", "Groceries", "Fun"]);
+    const result = runHook(() => useCategoryFilter({ categories, sortState: { key: "name", direction: "desc" } }));
+    expect(result.map((c) => c.name)).toEqual(["Utilities", "Rent", "Groceries", "Fun"]);
   });
 
   it("sorts by number field ascending", () => {
-    const { result } = renderHook(() =>
-      useCategoryFilter({ categories, sortState: { key: "budgeted", direction: "asc" } })
-    );
-    expect(result.current.map((c) => c.name)).toEqual(["Groceries", "Fun", "Utilities", "Rent"]);
+    const result = runHook(() => useCategoryFilter({ categories, sortState: { key: "budgeted", direction: "asc" } }));
+    expect(result.map((c) => c.name)).toEqual(["Groceries", "Fun", "Utilities", "Rent"]);
   });
 
   it("sorts by number field descending", () => {
-    const { result } = renderHook(() =>
-      useCategoryFilter({ categories, sortState: { key: "budgeted", direction: "desc" } })
-    );
-    expect(result.current.map((c) => c.name)).toEqual(["Rent", "Utilities", "Fun", "Groceries"]);
+    const result = runHook(() => useCategoryFilter({ categories, sortState: { key: "budgeted", direction: "desc" } }));
+    expect(result.map((c) => c.name)).toEqual(["Rent", "Utilities", "Fun", "Groceries"]);
   });
 
   it("handles empty categories array", () => {
-    const { result } = renderHook(() => useCategoryFilter({ categories: [] }));
-    expect(result.current).toEqual([]);
+    const result = runHook(() => useCategoryFilter({ categories: [] }));
+    expect(result).toEqual([]);
   });
 
   it("ignores unknown filter keys", () => {
-    const { result } = renderHook(() => useCategoryFilter({ categories, filterState: { unknown: "value" } }));
-    expect(result.current).toEqual([]);
+    const result = runHook(() => useCategoryFilter({ categories, filterState: { unknown: "value" } }));
+    expect(result).toEqual([]);
   });
 
   it("handles mixed type sorting fallback", () => {
-    const mixed = [
-      { id: "1", name: "A", value: 2 },
-      { id: "2", name: "B", value: "2" },
-      { id: "3", name: "C", value: 1 },
-    ] as Category[];
-    const { result } = renderHook(() =>
+    const mixed: Category[] = [
+      { id: "1", name: "A", value: 2, category_group_id: "g1", budgeted: 0, activity: 0, balance: 0 },
+      { id: "2", name: "B", value: "2", category_group_id: "g1", budgeted: 0, activity: 0, balance: 0 },
+      { id: "3", name: "C", value: 1, category_group_id: "g1", budgeted: 0, activity: 0, balance: 0 },
+    ];
+    const result = runHook(() =>
       useCategoryFilter({ categories: mixed, sortState: { key: "value", direction: "asc" } })
     );
-    expect(result.current.map((c) => c.id)).toEqual(["3", "1", "2"]);
+    expect(result.map((c) => c.id)).toEqual(["3", "2", "1"]);
   });
 });

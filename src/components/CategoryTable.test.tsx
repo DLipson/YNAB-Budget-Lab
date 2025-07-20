@@ -6,15 +6,23 @@ import { CategoryTable } from "./CategoryTable";
 describe("CategoryTable", () => {
   const categories = [
     {
+      id: "1",
       name: "Groceries",
-      amount: 100,
+      category_group_id: "cg1",
+      budgeted: 100,
+      activity: -80,
+      balance: 20,
       frequency: "Monthly",
       priority: "High",
       type: "Expense",
     },
     {
+      id: "2",
       name: "Salary",
-      amount: 2000,
+      category_group_id: "cg2",
+      budgeted: 2000,
+      activity: 2000,
+      balance: 0,
       frequency: "Monthly",
       priority: "Medium",
       type: "Income",

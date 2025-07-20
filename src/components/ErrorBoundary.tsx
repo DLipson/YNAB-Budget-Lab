@@ -20,7 +20,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Optionally log errorInfo
+    // Log error and errorInfo to avoid unused vars
+    // eslint-disable-next-line no-console
+    console.error("ErrorBoundary caught:", error, errorInfo);
   }
 
   render() {

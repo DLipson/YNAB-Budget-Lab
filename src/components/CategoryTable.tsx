@@ -1,14 +1,9 @@
 import * as React from "react";
 import { Table } from "baseui/table";
+import { Skeleton } from "baseui/skeleton";
 import { parseCategoryName } from "../utils/categoryParser";
 
-type Category = {
-  name: string;
-  amount: number;
-  frequency: string;
-  priority: string;
-  type: string;
-};
+import type { Category } from "../types/ynab";
 
 interface CategoryTableProps {
   categories: Category[];
@@ -26,27 +21,13 @@ export function CategoryTable({
   const columns = ["Category Name", "Amount", "Frequency", "Priority", "Type"];
 
   if (isLoading) {
-    // Show skeleton rows
+    // Show BaseUI Skeleton rows
     return (
       <Table
         columns={columns}
         data={Array(5)
           .fill(0)
-          .map(() =>
-            Array(columns.length).fill(
-              <div style={{ width: "100%" }}>
-                {/* BaseUI Skeleton */}
-                <div
-                  className="baseui-skeleton"
-                  style={{
-                    height: "16px",
-                    background: "#eee",
-                    borderRadius: "4px",
-                  }}
-                />
-              </div>
-            )
-          )}
+          .map(() => Array(columns.length).fill(<Skeleton animation height="16px" width="100%" />))}
       />
     );
   }
@@ -66,11 +47,11 @@ export function CategoryTable({
   const data = categories.map((cat) => {
     const parsed = parseCategoryName(cat.name);
     return [
-      parsed.name,
-      cat.amount,
-      parsed.frequency ?? cat.frequency ?? "",
-      parsed.priority ?? cat.priority ?? "",
-      parsed.type ?? cat.type ?? "",
+      <span>{String(parsed.name)}</span>,
+      <span>{String(cat.budgeted)}</span>,
+      <span>{String(parsed.frequency ?? cat.frequency ?? "")}</span>,
+      <span>{String(parsed.priority ?? cat.priority ?? "")}</span>,
+      <span>{String(parsed.type ?? cat.type ?? "")}</span>,
     ];
   });
 

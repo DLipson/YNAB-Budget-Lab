@@ -1,6 +1,8 @@
+import * as React from "react";
 import { Block } from "baseui/block";
 import { Heading, HeadingLevel } from "baseui/heading";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { Skeleton } from "baseui/skeleton";
 
 import { CategoryControls } from "./components/CategoryControls";
 import { CategoryTable } from "./components/CategoryTable";
@@ -62,12 +64,21 @@ function App() {
   const [filterState] = useState({});
   const [sortState] = useState<{ key: string; direction: "asc" | "desc" }>({ key: "name", direction: "asc" });
 
+  // Loading state for demonstration
+  const [loading, setLoading] = useState(true);
+
   // Connect filter/sort to hook
   const filteredCategories = useCategoryFilter({
     categories: mockCategories,
     filterState,
     sortState,
   });
+
+  // Simulate loading for 1.5s
+  React.useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ErrorBoundary>
@@ -80,12 +91,16 @@ function App() {
           </HeadingLevel>
         </Block>
         <Block as="main">
-          <div style={{ marginBottom: "2rem" }}>
-            {/* Controls UI */}
-            <CategoryControls />
-          </div>
+          {loading ? (
+            <Skeleton animation height="48px" width="100%" overrides={{ Root: { style: { marginBottom: "2rem" } } }} />
+          ) : (
+            <div style={{ marginBottom: "2rem" }}>
+              {/* Controls UI */}
+              <CategoryControls />
+            </div>
+          )}
           {/* Table UI */}
-          <CategoryTable categories={filteredCategories as any} />
+          <CategoryTable categories={filteredCategories as Category[]} isLoading={loading} />
         </Block>
       </Block>
     </ErrorBoundary>

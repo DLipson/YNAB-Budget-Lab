@@ -37,4 +37,5 @@ export interface Category {
   activity: number;
   balance: number;
   // Add more fields as needed
+  [key: string]: unknown;
 }

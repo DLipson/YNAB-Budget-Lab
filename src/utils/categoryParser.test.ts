@@ -40,10 +40,10 @@ describe("parseCategoryName", () => {
   });
 
   it("returns name only for non-string input", () => {
-    expect(parseCategoryName(null as any)).toEqual({
+    expect(parseCategoryName(null as unknown as string)).toEqual({
       name: "null",
     });
-    expect(parseCategoryName(123 as any)).toEqual({
+    expect(parseCategoryName(123 as unknown as string)).toEqual({
       name: "123",
     });
   });
