@@ -1,6 +1,7 @@
 // src/services/ynab-api.ts
 import { YNAB_API_BASE_URL, getYnabApiHeaders } from "../config/api";
 import type { YnabApiResponse } from "../types/ynab";
+import type { BudgetSummary } from "../types/ynab";
 
 /**
  * Base fetch wrapper for YNAB API requests.
@@ -69,4 +70,16 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
   }
 
   return response.json();
+}
+
+/**
+ * Fetches the list of budgets from the YNAB API.
+ * Returns an array of BudgetSummary objects.
+ */
+export async function fetchBudgets(): Promise<BudgetSummary[]> {
+  const response = await ynabFetch<YnabApiResponse<{ budgets: BudgetSummary[] }>>("/budgets");
+  if (response.error) {
+    throw new Error(`YNAB API error: ${response.error.detail}`);
+  }
+  return response.data.budgets;
 }
