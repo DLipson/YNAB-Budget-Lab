@@ -2,7 +2,7 @@ import * as React from "react";
 import { Table } from "baseui/table";
 import { Skeleton } from "baseui/skeleton";
 import { Block } from "baseui/block";
-import { parseCategoryName } from "../utils/categoryParser";
+import { parseCategoryGroupName } from "../utils/categoryParser";
 
 import type { Category } from "../types/ynab";
 
@@ -93,13 +93,13 @@ export function CategoryTable({
   }
 
   const data = categories.map((cat) => {
-    const parsed = parseCategoryName(cat.name);
+    const parsedGroup = parseCategoryGroupName(cat.category_group_name ?? "");
     return [
-      <span>{String(parsed.name)}</span>,
+      <span>{String(cat.name)}</span>,
       <span>{String(cat.budgeted)}</span>,
-      <span>{String(parsed.frequency ?? cat.frequency ?? "")}</span>,
-      <span>{String(parsed.priority ?? cat.priority ?? "")}</span>,
-      <span>{String(parsed.type ?? cat.type ?? "")}</span>,
+      <span>{String(parsedGroup.frequency ?? cat.frequency ?? "")}</span>,
+      <span>{String(parsedGroup.priority ?? cat.priority ?? "")}</span>,
+      <span>{String(parsedGroup.type ?? cat.type ?? "")}</span>,
     ];
   });
 
