@@ -1,24 +1,37 @@
 // src/hooks/useBudgets.ts
 import { useState, useEffect } from "react";
 import { ynabFetch } from "../services/ynab-api";
-import type { YnabApiResponse, BudgetSummary } from "../types/ynab";
+import type { BudgetSummary, YnabApiResponse } from "../types/ynab";
 
-export function useBudgets(apiKey: string) {
+/**
+ * Minimal hook for fetching and managing YNAB budget data.
+ * SRP: Only handles budget list retrieval.
+ */
+export function useBudgets() {
   const [budgets, setBudgets] = useState<BudgetSummary[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!apiKey) return;
+    let isMounted = true;
     setLoading(true);
-    setError(null);
-    ynabFetch<YnabApiResponse<{ budgets: BudgetSummary[] }>>("/budgets", {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    })
-      .then((res) => setBudgets(res.data.budgets))
-      .catch((err) => setError(err.message || "Failed to fetch budgets"))
-      .finally(() => setLoading(false));
-  }, [apiKey]);
+    ynabFetch<YnabApiResponse<{ budgets: BudgetSummary[] }>>("/budgets")
+      .then((res) => {
+        if (isMounted) {
+          setBudgets(res.data.budgets || []);
+          setError(res.error ? res.error.detail : null);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) setError(err.message || "Unknown error");
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return { budgets, loading, error };
 }
