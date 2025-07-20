@@ -25,7 +25,6 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
   try {
     // Logging request
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.log("[YNAB API] Request:", url, options);
     }
     const response = await fetch(url, { ...options, headers });
@@ -33,7 +32,6 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
 
     // Logging response
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.log("[YNAB API] Response:", data);
     }
 
@@ -41,12 +39,15 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
       throw new Error(data?.error?.detail || `YNAB API error: ${response.status} ${response.statusText}`);
     }
     return data as T;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Logging error
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.error("[YNAB API] Error:", error);
     }
-    throw new Error(error?.message || "Network error occurred while calling YNAB API");
+    const errorMsg =
+      error && typeof error === "object" && "message" in error
+        ? (error as { message?: string }).message
+        : "Network error occurred while calling YNAB API";
+    throw new Error(errorMsg || "Network error occurred while calling YNAB API");
   }
 }
