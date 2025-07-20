@@ -23,10 +23,42 @@ function runHook<T>(hook: () => T) {
 }
 
 const categories: Category[] = [
-  { id: "1", name: "Groceries", category_group_id: "g1", budgeted: 100, activity: 50, balance: 50 },
-  { id: "2", name: "Rent", category_group_id: "g2", budgeted: 1000, activity: 1000, balance: 0 },
-  { id: "3", name: "Utilities", category_group_id: "g1", budgeted: 200, activity: 150, balance: 50 },
-  { id: "4", name: "Fun", category_group_id: "g3", budgeted: 150, activity: 50, balance: 100 },
+  {
+    id: "1",
+    name: "Groceries",
+    category_group_id: "g1",
+    category_group_name: "Monthly:High:Expense",
+    budgeted: 100,
+    activity: 50,
+    balance: 50,
+  },
+  {
+    id: "2",
+    name: "Rent",
+    category_group_id: "g2",
+    category_group_name: "Monthly:High:Expense",
+    budgeted: 1000,
+    activity: 1000,
+    balance: 0,
+  },
+  {
+    id: "3",
+    name: "Utilities",
+    category_group_id: "g1",
+    category_group_name: "Monthly:Medium:Expense",
+    budgeted: 200,
+    activity: 150,
+    balance: 50,
+  },
+  {
+    id: "4",
+    name: "Fun",
+    category_group_id: "g3",
+    category_group_name: "Monthly:Low:Expense",
+    budgeted: 150,
+    activity: 50,
+    balance: 100,
+  },
 ];
 
 describe("useCategoryFilter", () => {
@@ -84,9 +116,36 @@ describe("useCategoryFilter", () => {
 
   it("handles mixed type sorting fallback", () => {
     const mixed: Category[] = [
-      { id: "1", name: "A", value: 2, category_group_id: "g1", budgeted: 0, activity: 0, balance: 0 },
-      { id: "2", name: "B", value: "2", category_group_id: "g1", budgeted: 0, activity: 0, balance: 0 },
-      { id: "3", name: "C", value: 1, category_group_id: "g1", budgeted: 0, activity: 0, balance: 0 },
+      {
+        id: "1",
+        name: "A",
+        value: 2,
+        category_group_id: "g1",
+        category_group_name: "Monthly:High:Expense",
+        budgeted: 0,
+        activity: 0,
+        balance: 0,
+      },
+      {
+        id: "2",
+        name: "B",
+        value: "2",
+        category_group_id: "g1",
+        category_group_name: "Monthly:High:Expense",
+        budgeted: 0,
+        activity: 0,
+        balance: 0,
+      },
+      {
+        id: "3",
+        name: "C",
+        value: 1,
+        category_group_id: "g1",
+        category_group_name: "Monthly:High:Expense",
+        budgeted: 0,
+        activity: 0,
+        balance: 0,
+      },
     ];
     const result = runHook(() =>
       useCategoryFilter({ categories: mixed, sortState: { key: "value", direction: "asc" } })
