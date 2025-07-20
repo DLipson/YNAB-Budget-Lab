@@ -23,6 +23,16 @@ A modern React frontend for advanced YNAB (You Need A Budget) category managemen
 1. **Demo Mode**: Leave API token blank to try with mock data
 2. **YNAB Integration**: Enter your Personal Access Token to connect real data
 
+## Environment Setup
+
+Create a `.env.local` file in the project root with the following content:
+
+```env
+VITE_YNAB_API_KEY=
+```
+
+This key is required for authenticating requests to the YNAB API. Enter your Personal Access Token after the `=` sign.
+
 ## Usage
 
 ### Basic Operations
