@@ -71,7 +71,7 @@ it("shows loading skeletons when isLoading is true", () => {
   render(<CategoryTable categories={[]} isLoading />);
   expect(screen.getAllByRole("row")).toHaveLength(6); // 1 header + 5 skeleton rows
   expect(
-    screen.getAllByText((content, element) => !!element && element.className.includes("baseui-skeleton"))
+    screen.getAllByText((_, element) => !!element && element.className.includes("baseui-skeleton"))
   ).not.toHaveLength(0);
 });
 
