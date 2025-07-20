@@ -38,6 +38,8 @@ const typeOptions = [
   { label: "Variable", id: "variable" },
 ];
 
+import styles from "./CategoryControls.module.css";
+
 export const CategoryControls: React.FC = () => {
   const [sortValue, setSortValue] = React.useState<{ label: string; id: string }[]>([]);
   const [frequencyValue, setFrequencyValue] = React.useState<{ label: string; id: string }[]>([]);
@@ -45,7 +47,7 @@ export const CategoryControls: React.FC = () => {
   const [typeValue, setTypeValue] = React.useState<{ label: string; id: string }[]>([]);
 
   return (
-    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+    <div className={styles.controlsContainer}>
       <Select
         options={sortOptions}
         placeholder="Sort by"
@@ -108,7 +110,7 @@ export const CategoryControls: React.FC = () => {
       />
       <button
         type="button"
-        style={{ padding: "0.5rem 1rem", marginLeft: "1rem" }}
+        className={styles.clearButton}
         onClick={() => {
           setSortValue([]);
           setFrequencyValue([{ label: "All", id: "all" }]);

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import type { ReactNode } from "react";
+import styles from "./ErrorBoundary.module.css";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -28,7 +29,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
+        <div className={styles.errorContainer}>
           <h2>Something went wrong.</h2>
           <pre>{this.state.error?.message}</pre>
         </div>

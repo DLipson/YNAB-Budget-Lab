@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./RetryButton.module.css";
 
 interface RetryButtonProps {
   onClick?: () => void;
@@ -6,19 +7,7 @@ interface RetryButtonProps {
 
 export function RetryButton({ onClick }: RetryButtonProps) {
   return (
-    <button
-      style={{
-        marginTop: "0.5rem",
-        padding: "0.5rem 1rem",
-        background: "#e53e3e",
-        color: "#fff",
-        border: "none",
-        borderRadius: "4px",
-        cursor: "pointer",
-      }}
-      onClick={onClick}
-      data-testid="retry-button"
-    >
+    <button className={styles.retryButton} onClick={onClick} data-testid="retry-button">
       Retry
     </button>
   );

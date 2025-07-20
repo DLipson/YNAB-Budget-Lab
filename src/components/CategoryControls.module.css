@@ -1,0 +1,10 @@
+.controlsContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.clearButton {
+  padding: 0.5rem 1rem;
+  margin-left: 1rem;
+}

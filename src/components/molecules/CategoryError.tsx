@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./CategoryError.module.css";
 import { RetryButton } from "../atoms/RetryButton";
 
 interface CategoryErrorProps {
@@ -8,7 +9,7 @@ interface CategoryErrorProps {
 
 export function CategoryError({ error, onRetry }: CategoryErrorProps) {
   return (
-    <div style={{ color: "red", padding: "1rem" }}>
+    <div className={styles.errorContainer}>
       Error loading categories: {error}
       <br />
       <RetryButton onClick={onRetry} />
