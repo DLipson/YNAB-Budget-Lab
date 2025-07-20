@@ -1,16 +1,18 @@
-import React from "react";
+import * as React from "react";
+import { Button as BaseUIButton } from "baseui/button";
+import type { ButtonProps as BaseUIButtonProps } from "baseui/button";
 
 type ButtonProps = {
   children: React.ReactNode;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  type?: "button" | "submit" | "reset";
-  disabled?: boolean;
+  onClick?: BaseUIButtonProps["onClick"];
+  type?: BaseUIButtonProps["type"];
+  disabled?: BaseUIButtonProps["disabled"];
 };
 
 const Button: React.FC<ButtonProps> = ({ children, onClick, type = "button", disabled = false }) => (
-  <button type={type} onClick={onClick} disabled={disabled}>
+  <BaseUIButton onClick={onClick} type={type} disabled={disabled}>
     {children}
-  </button>
+  </BaseUIButton>
 );
 
 export default Button;
