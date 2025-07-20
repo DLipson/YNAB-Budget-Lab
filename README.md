@@ -2,6 +2,63 @@
 
 A modern React frontend for advanced YNAB (You Need A Budget) category management with smart filtering and scenario planning capabilities.
 
+## Prerequisites
+
+- Node.js (v18+ recommended)
+- npm (v9+ recommended)
+- YNAB Personal Access Token (for real data integration)
+
+## Installation
+
+```bash
+git clone https://github.com/your-org/ynab-budget-lab.git
+cd ynab-budget-lab
+npm install
+```
+
+## Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```env
+VITE_YNAB_API_KEY=
+```
+
+- Leave blank to use demo mode (mock data).
+- Enter your YNAB Personal Access Token to connect to your real budget.
+
+## Running in Development
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Running Tests
+
+```bash
+npm test
+```
+
+- Runs all unit and component tests.
+- Coverage reports are generated in the `coverage/` directory.
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+- Output files are generated in the `dist/` directory.
+
+## Troubleshooting
+
+- **API Key Issues**: Ensure your `VITE_YNAB_API_KEY` is correct and active.
+- **Dependency Errors**: Run `npm install` to resolve missing packages.
+- **TypeScript/ESLint Errors**: Run `npm run lint` and `npm run typecheck` for diagnostics.
+- **Port Conflicts**: Change the dev server port in `vite.config.ts` if needed.
+
 ## Features
 
 ### Core Functionality
@@ -17,21 +74,6 @@ A modern React frontend for advanced YNAB (You Need A Budget) category managemen
 - **Responsive Layout**: Works seamlessly on desktop and mobile devices
 - **Interactive Components**: Smooth animations and hover effects
 - **Dark Theme**: Eye-friendly dark interface with vibrant accents
-
-## Quick Start
-
-1. **Demo Mode**: Leave API token blank to try with mock data
-2. **YNAB Integration**: Enter your Personal Access Token to connect real data
-
-## Environment Setup
-
-Create a `.env.local` file in the project root with the following content:
-
-```env
-VITE_YNAB_API_KEY=
-```
-
-This key is required for authenticating requests to the YNAB API. Enter your Personal Access Token after the `=` sign.
 
 ## Usage
 
@@ -58,40 +100,8 @@ This key is required for authenticating requests to the YNAB API. Enter your Per
 ## Technical Stack
 
 - **React 18**: Modern hooks-based architecture
-- **MUI Base**: Unstyled component primitives
-- **Tailwind CSS**: Utility-first styling
-- **Lucide React**: Clean, consistent icons
-
-## Environment Setup
-
-To enable YNAB API access, create a `.env.local` file in the project root with the following content:
-
-```
-VITE_YNAB_API_KEY=your_ynab_api_key_here
-```
-
-- This API key is required for connecting to the YNAB API.
-- The `.env.local` file is ignored by git and should not be committed.
-
-## Component Architecture
-
-- **Atoms**: Basic UI components (Button, Input, Select, etc.)
-- **Molecules**: Composite components (FilterBar, BudgetControls, etc.)
-- **Organisms**: Complex components (CategoryTable)
-- **Pages**: Full page components (YnabCustomFrontend)
-
-## Mock Data Structure
-
-Categories include:
-
-- Basic info: `id`, `name`, `budgeted`
-- Segments: `frequency`, `priority`, `type`
-- Scenario state: `enabled`, `currentBudgeted`, `originalBudgeted`
-
-## Future Enhancements
-
-- Real YNAB API integration
-- Data persistence
-- Export capabilities
-- Advanced reporting
-- Custom category segments
+- **TypeScript**: Type-safe codebase
+- **Vite**: Fast build and dev server
+- **BaseUI**: Consistent, accessible components
+- **Jest**: Unit and component testing
+- **ESLint**: Code linting and style enforcement
