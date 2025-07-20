@@ -127,3 +127,7 @@ Categories should use the format: `Frequency:Priority:Fixed/Variable`.
 - **BaseUI**: Consistent, accessible components
 - **Jest**: Unit and component testing
 - **ESLint**: Code linting and style enforcement
+
+## Browser Support
+
+Cross-browser testing (Chrome, Firefox, Edge, Safari) is pending. No browser-specific issues have been documented yet.
