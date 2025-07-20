@@ -10,6 +10,13 @@ export interface YnabApiResponse<T = unknown> {
   data: T;
   error?: YnabApiError;
 }
+// Example: User response
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  // Add more fields as needed
+}
 
 // Example: Budget summary response
 export interface BudgetSummary {
