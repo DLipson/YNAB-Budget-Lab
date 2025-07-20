@@ -36,14 +36,14 @@ export function CategoryTable({
     return <CategoryEmptyState filterActive={filterActive} />;
   }
 
-  const data = categories.map((cat) => {
-    const parsedGroup = parseCategoryGroupName(cat.category_group_name ?? "");
+  const data = categories.map((category) => {
+    const parsedGroup = parseCategoryGroupName(category.category_group_name ?? "");
     return [
-      <span>{String(cat.name)}</span>,
-      <span>{String(cat.budgeted)}</span>,
-      <span>{String(parsedGroup.frequency ?? cat.frequency ?? "")}</span>,
-      <span>{String(parsedGroup.priority ?? cat.priority ?? "")}</span>,
-      <span>{String(parsedGroup.type ?? cat.type ?? "")}</span>,
+      <span>{String(category.name)}</span>,
+      <span>{String(category.budgeted)}</span>,
+      <span>{String(parsedGroup.frequency ?? category.frequency ?? "")}</span>,
+      <span>{String(parsedGroup.priority ?? category.priority ?? "")}</span>,
+      <span>{String(parsedGroup.type ?? category.type ?? "")}</span>,
     ];
   });
 
