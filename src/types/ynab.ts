@@ -33,6 +33,7 @@ export interface Category {
   id: string;
   name: string;
   category_group_id: string;
+  category_group_name: string;
   budgeted: number;
   activity: number;
   balance: number;
