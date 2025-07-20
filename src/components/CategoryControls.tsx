@@ -49,6 +49,11 @@ export const CategoryControls: React.FC = () => {
       <Select
         options={sortOptions}
         placeholder="Sort by"
+        overrides={{
+          Input: {
+            props: { placeholder: "Sort by" },
+          },
+        }}
         value={sortValue}
         onChange={({ value }) => setSortValue([...value] as { label: string; id: string }[])}
         clearable={false}
@@ -56,6 +61,11 @@ export const CategoryControls: React.FC = () => {
       <Select
         options={frequencyOptions}
         placeholder="Frequency"
+        overrides={{
+          Input: {
+            props: { placeholder: "Frequency" },
+          },
+        }}
         value={frequencyValue}
         onChange={({ value }) => setFrequencyValue([...value] as { label: string; id: string }[])}
         clearable={false}
@@ -63,6 +73,11 @@ export const CategoryControls: React.FC = () => {
       <Select
         options={priorityOptions}
         placeholder="Priority"
+        overrides={{
+          Input: {
+            props: { placeholder: "Priority" },
+          },
+        }}
         value={priorityValue}
         onChange={({ value }) => setPriorityValue([...value] as { label: string; id: string }[])}
         clearable={false}
@@ -70,11 +85,27 @@ export const CategoryControls: React.FC = () => {
       <Select
         options={typeOptions}
         placeholder="Type"
+        overrides={{
+          Input: {
+            props: { placeholder: "Type" },
+          },
+        }}
         value={typeValue}
         onChange={({ value }) => setTypeValue([...value] as { label: string; id: string }[])}
         clearable={false}
       />
-      <Select options={filterOptions} placeholder="Filter by" value={[]} onChange={() => {}} clearable={false} />
+      <Select
+        options={filterOptions}
+        placeholder="Filter by"
+        overrides={{
+          Input: {
+            props: { placeholder: "Filter by" },
+          },
+        }}
+        value={[]}
+        onChange={() => {}}
+        clearable={false}
+      />
       <button
         type="button"
         style={{ padding: "0.5rem 1rem", marginLeft: "1rem" }}

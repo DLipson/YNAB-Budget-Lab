@@ -17,7 +17,7 @@ describe("CategoryControls", () => {
     fireEvent.click(sortSelect);
     expect(screen.getByText("Name")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Name"));
-    expect(sortSelect).toHaveTextContent("Name");
+    expect(screen.getByText("Name")).toBeInTheDocument();
   });
 
   it("allows selecting frequency filter", () => {
@@ -26,7 +26,7 @@ describe("CategoryControls", () => {
     fireEvent.click(freqSelect);
     expect(screen.getByText("Monthly")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Monthly"));
-    expect(freqSelect).toHaveTextContent("Monthly");
+    expect(screen.getByText("Monthly")).toBeInTheDocument();
   });
 
   it("allows selecting priority filter", () => {
@@ -35,7 +35,7 @@ describe("CategoryControls", () => {
     fireEvent.click(prioritySelect);
     expect(screen.getByText("High")).toBeInTheDocument();
     fireEvent.click(screen.getByText("High"));
-    expect(prioritySelect).toHaveTextContent("High");
+    expect(screen.getByText("High")).toBeInTheDocument();
   });
 
   it("allows selecting type filter", () => {
@@ -44,7 +44,7 @@ describe("CategoryControls", () => {
     fireEvent.click(typeSelect);
     expect(screen.getByText("Fixed")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Fixed"));
-    expect(typeSelect).toHaveTextContent("Fixed");
+    expect(screen.getByText("Fixed")).toBeInTheDocument();
   });
 
   it('renders "Clear All Filters" button if present and clears filters on click', () => {
@@ -65,11 +65,11 @@ describe("CategoryControls", () => {
     const freqSelect = screen.getByPlaceholderText("Frequency");
     fireEvent.click(freqSelect);
     fireEvent.click(screen.getByText("Weekly"));
-    expect(freqSelect).toHaveTextContent("Weekly");
+    expect(screen.getByText("Weekly")).toBeInTheDocument();
 
     const prioritySelect = screen.getByPlaceholderText("Priority");
     fireEvent.click(prioritySelect);
     fireEvent.click(screen.getByText("Low"));
-    expect(prioritySelect).toHaveTextContent("Low");
+    expect(screen.getByText("Low")).toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Table } from "baseui/table";
 import { Skeleton } from "baseui/skeleton";
+import { Block } from "baseui/block";
 import { parseCategoryName } from "../utils/categoryParser";
 
 import type { Category } from "../types/ynab";
@@ -27,7 +28,20 @@ export function CategoryTable({
         columns={columns}
         data={Array(5)
           .fill(0)
-          .map(() => Array(columns.length).fill(<Skeleton animation height="16px" width="100%" />))}
+          .map(() =>
+            Array(columns.length).fill(
+              <Skeleton
+                animation
+                height="16px"
+                width="100%"
+                overrides={{
+                  Root: {
+                    props: { className: "baseui-skeleton" },
+                  },
+                }}
+              />
+            )
+          )}
       />
     );
   }
@@ -38,9 +52,22 @@ export function CategoryTable({
 
   if (categories.length === 0) {
     return (
-      <div style={{ padding: "1rem", color: "#888" }}>
+      <Block
+        overrides={{
+          Block: {
+            style: {
+              padding: "1.5rem",
+              color: "#888",
+              textAlign: "center",
+              backgroundColor: "#f7f7f7",
+              borderRadius: "8px",
+              margin: "1rem 0",
+            },
+          },
+        }}
+      >
         {filterActive ? "No categories match your filter." : "No categories available."}
-      </div>
+      </Block>
     );
   }
 
