@@ -97,6 +97,28 @@ npm run build
 - Click "Copy Formula" to generate Excel-compatible formula
 - Paste directly into spreadsheets
 
+## Category Naming Convention
+
+Categories should use the format: `Frequency:Priority:Fixed/Variable`.
+
+**Format Breakdown:**
+
+- `Frequency`: How often the expense occurs (e.g., Monthly, Weekly, Annual)
+- `Priority`: Importance level (e.g., High, Medium, Low)
+- `Fixed/Variable`: Type of expense
+
+**Examples:**
+
+- `Monthly:High:Fixed`
+- `Annual:Low:Variable`
+- `Weekly:Medium:Fixed`
+
+**Tips:**
+
+- Use consistent spelling and capitalization for easier filtering.
+- If a category name is malformed or missing segments, update it to match the convention for best results.
+- The app will attempt to parse partial names, but full format is recommended.
+
 ## Technical Stack
 
 - **React 18**: Modern hooks-based architecture
