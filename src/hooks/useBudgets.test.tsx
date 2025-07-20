@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, beforeEach, vi } from "vitest";
 import { useBudgets } from "./useBudgets";
