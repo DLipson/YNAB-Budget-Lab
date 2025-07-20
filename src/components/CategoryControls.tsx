@@ -45,7 +45,7 @@ export const CategoryControls: React.FC = () => {
   const [typeValue, setTypeValue] = React.useState<{ label: string; id: string }[]>([]);
 
   return (
-    <div style={{ display: "flex", gap: "1rem" }}>
+    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
       <Select
         options={sortOptions}
         placeholder="Sort by"
@@ -75,6 +75,18 @@ export const CategoryControls: React.FC = () => {
         clearable={false}
       />
       <Select options={filterOptions} placeholder="Filter by" value={[]} onChange={() => {}} clearable={false} />
+      <button
+        type="button"
+        style={{ padding: "0.5rem 1rem", marginLeft: "1rem" }}
+        onClick={() => {
+          setSortValue([]);
+          setFrequencyValue([{ label: "All", id: "all" }]);
+          setPriorityValue([{ label: "All", id: "all" }]);
+          setTypeValue([{ label: "All", id: "all" }]);
+        }}
+      >
+        Clear All Filters
+      </button>
     </div>
   );
 };
