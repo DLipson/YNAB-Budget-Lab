@@ -1,4 +1,5 @@
-import React, { Component, ReactNode } from "react";
+import React, { Component } from "react";
+import type { ReactNode } from "react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -21,7 +22,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error and errorInfo to avoid unused vars
-    // eslint-disable-next-line no-console
     console.error("ErrorBoundary caught:", error, errorInfo);
   }
 
