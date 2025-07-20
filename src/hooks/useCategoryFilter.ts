@@ -33,13 +33,8 @@ export function useCategoryFilter({ categories, filterState, sortState }: UseCat
         Object.entries(filterState).every(([key, value]) => {
           // Support filtering by segments in category_group_name
           if (key === "frequency" || key === "priority" || key === "type") {
-            if (typeof cat.category_group_name === "string") {
-              const [frequency, priority, type] = cat.category_group_name.split(":").map((p: string) => p.trim());
-              if (key === "frequency") return frequency === value;
-              if (key === "priority") return priority === value;
-              if (key === "type") return type === value;
-            }
-            return false;
+            const parsed = parseCategoryGroupName(cat.category_group_name);
+            return parsed[key] === value;
           }
           return cat[key] === value;
         })
@@ -54,21 +49,11 @@ export function useCategoryFilter({ categories, filterState, sortState }: UseCat
 
         // Support sorting by segments in category_group_name
         if (sortState.key === "frequency" || sortState.key === "priority" || sortState.key === "type") {
-          if (typeof a.category_group_name === "string" && typeof b.category_group_name === "string") {
-            const [aFreq, aPri, aType] = a.category_group_name.split(":").map((p: string) => p.trim());
-            const [bFreq, bPri, bType] = b.category_group_name.split(":").map((p: string) => p.trim());
-            if (sortState.key === "frequency") {
-              aVal = aFreq;
-              bVal = bFreq;
-            }
-            if (sortState.key === "priority") {
-              aVal = aPri;
-              bVal = bPri;
-            }
-            if (sortState.key === "type") {
-              aVal = aType;
-              bVal = bType;
-            }
+          if (sortState.key === "frequency" || sortState.key === "priority" || sortState.key === "type") {
+            const aParsed = parseCategoryGroupName(a.category_group_name);
+            const bParsed = parseCategoryGroupName(b.category_group_name);
+            aVal = aParsed[sortState.key];
+            bVal = bParsed[sortState.key];
           }
         }
 
