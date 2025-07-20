@@ -1,15 +1,15 @@
-// src/components/atoms/Input.tsx
 import React from "react";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-}
+type InputProps = {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  placeholder?: string;
+  className?: string;
+};
 
-export function Input({ label, ...props }: InputProps) {
-  return (
-    <label style={{ display: "block", marginBottom: 8 }}>
-      {label && <span style={{ marginRight: 8 }}>{label}</span>}
-      <input {...props} style={{ padding: 8, fontSize: 16, width: "100%" }} />
-    </label>
-  );
-}
+const Input: React.FC<InputProps> = ({ value, onChange, type = "text", placeholder, className }) => (
+  <input value={value} onChange={onChange} type={type} placeholder={placeholder} className={className} />
+);
+
+export default Input;
