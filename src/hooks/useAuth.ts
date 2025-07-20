@@ -1,46 +1,48 @@
 // src/hooks/useAuth.ts
-import { useState } from "react";
-import { ynabFetch } from "../services/ynab-api";
-import type { YnabApiResponse } from "../types/ynab";
 
-export function useAuth() {
-  const [apiKey, setApiKey] = useState<string>("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+import { useState, useCallback } from "react";
 
-  async function validateApiKey(key: string) {
-    setLoading(true);
-    setError(null);
-    try {
-      // Validate by calling /user endpoint
-      await ynabFetch<YnabApiResponse>("/user", {
-        headers: { Authorization: `Bearer ${key}` },
-      });
-      setApiKey(key);
-      setIsAuthenticated(true);
-    } catch (err: unknown) {
-      const errorMsg =
-        err && typeof err === "object" && "message" in err ? (err as { message?: string }).message : "Invalid API key";
-      setError(errorMsg || "Invalid API key");
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  }
+type UseAuthReturn = {
+  apiKey: string;
+  setApiKey: (key: string) => void;
+  isValid: boolean;
+  validateApiKey: (key?: string) => boolean;
+  isAuthenticated: boolean;
+};
 
-  function logout() {
-    setApiKey("");
-    setIsAuthenticated(false);
-    setError(null);
-  }
+const API_KEY_REGEX = /^[a-zA-Z0-9_-]{32,64}$/;
+
+export function useAuth(): UseAuthReturn & { error?: string } {
+  const [apiKey, setApiKey] = useState("");
+  const [isValid, setIsValid] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const validateApiKey = useCallback(
+    (key?: string) => {
+      const value = key ?? apiKey;
+      const valid = API_KEY_REGEX.test(value);
+      setIsValid(valid);
+      if (!valid && value) {
+        setError("Invalid API key format");
+      } else {
+        setError(undefined);
+      }
+      return valid;
+    },
+    [apiKey]
+  );
+
+  const isAuthenticated = isValid && !!apiKey;
 
   return {
     apiKey,
-    isAuthenticated,
-    loading,
-    error,
+    setApiKey: (key: string) => {
+      setApiKey(key);
+      validateApiKey(key);
+    },
+    isValid,
     validateApiKey,
-    logout,
+    isAuthenticated,
+    error,
   };
 }
