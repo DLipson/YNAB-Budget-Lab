@@ -1,5 +1,5 @@
 // src/components/molecules/BudgetSelector.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useBudgets } from "../../hooks/useBudgets";
 
 export interface BudgetSelectorProps {
