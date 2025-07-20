@@ -1,7 +1,9 @@
 import { Table } from "baseui/table";
-import { Skeleton } from "baseui/skeleton";
 import { Block } from "baseui/block";
 import { parseCategoryGroupName } from "../utils/categoryParser";
+import { CategoryTableSkeleton } from "../components/molecules/CategoryTableSkeleton";
+import { CategoryError } from "../components/molecules/CategoryError";
+import { CategoryEmptyState } from "../components/molecules/CategoryEmptyState";
 
 import type { Category } from "../types/ynab";
 
@@ -23,72 +25,15 @@ export function CategoryTable({
   const columns = ["Category Name", "Amount", "Frequency", "Priority", "Type"];
 
   if (isLoading) {
-    // Show BaseUI Skeleton rows
-    return (
-      <Table
-        columns={columns}
-        data={Array(5)
-          .fill(0)
-          .map(() =>
-            Array(columns.length).fill(
-              <Skeleton
-                animation
-                height="16px"
-                width="100%"
-                overrides={{
-                  Root: {
-                    props: { className: "baseui-skeleton" },
-                  },
-                }}
-              />
-            )
-          )}
-      />
-    );
+    return <CategoryTableSkeleton columns={columns} />;
   }
 
   if (error) {
-    return (
-      <div style={{ color: "red", padding: "1rem" }}>
-        Error loading categories: {error}
-        <br />
-        <button
-          style={{
-            marginTop: "0.5rem",
-            padding: "0.5rem 1rem",
-            background: "#e53e3e",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-          onClick={() => typeof onRetry === "function" && onRetry()}
-        >
-          Retry
-        </button>
-      </div>
-    );
+    return <CategoryError error={error} onRetry={onRetry} />;
   }
 
   if (categories.length === 0) {
-    return (
-      <Block
-        overrides={{
-          Block: {
-            style: {
-              padding: "1.5rem",
-              color: "#888",
-              textAlign: "center",
-              backgroundColor: "#f7f7f7",
-              borderRadius: "8px",
-              margin: "1rem 0",
-            },
-          },
-        }}
-      >
-        {filterActive ? "No categories match your filter." : "No categories available."}
-      </Block>
-    );
+    return <CategoryEmptyState filterActive={filterActive} />;
   }
 
   const data = categories.map((cat) => {
