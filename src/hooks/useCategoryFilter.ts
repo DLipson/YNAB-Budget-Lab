@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { Category } from "../types/ynab";
+import { parseCategoryGroupName } from "../utils/categoryParser";
 
 export interface CategoryFilterState {
   [key: string]: string | number | boolean;
