@@ -2,52 +2,71 @@
 import { YNAB_API_BASE_URL, getYnabApiHeaders } from "../config/api";
 import type { YnabApiResponse } from "../types/ynab";
 
-// Simple in-memory rate limiter
-let requestCount = 0;
-let resetTime = Date.now() + 60 * 60 * 1000; // 1 hour
+/**
+ * Base fetch wrapper for YNAB API requests.
+ * Only handles request construction and response parsing.
+ * Implements simple rate limiting: max 200 requests per hour.
+ */
 
-function checkRateLimit() {
-  if (Date.now() > resetTime) {
-    requestCount = 0;
-    resetTime = Date.now() + 60 * 60 * 1000;
-  }
-  if (requestCount >= 200) {
-    throw new Error("YNAB API rate limit exceeded (200 requests/hour)");
-  }
-  requestCount++;
-}
+let requestCount = 0;
+let windowStart = Date.now();
+
+const MAX_REQUESTS_PER_HOUR = 200;
+const WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
 export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  checkRateLimit();
+  const now = Date.now();
+  if (now - windowStart >= WINDOW_MS) {
+    // Reset window
+    windowStart = now;
+    requestCount = 0;
+  }
+  if (requestCount >= MAX_REQUESTS_PER_HOUR) {
+    throw new Error("YNAB API rate limit exceeded: max 200 requests per hour.");
+  }
+  requestCount++;
+
   const url = `${YNAB_API_BASE_URL}${endpoint}`;
   const headers = { ...getYnabApiHeaders(), ...options.headers };
 
-  try {
-    // Logging request
-    if (import.meta.env.DEV) {
-      console.log("[YNAB API] Request:", url, options);
-    }
-    const response = await fetch(url, { ...options, headers });
-    const data = await response.json();
-
-    // Logging response
-    if (import.meta.env.DEV) {
-      console.log("[YNAB API] Response:", data);
-    }
-
-    if (!response.ok) {
-      throw new Error(data?.error?.detail || `YNAB API error: ${response.status} ${response.statusText}`);
-    }
-    return data as T;
-  } catch (error: unknown) {
-    // Logging error
-    if (import.meta.env.DEV) {
-      console.error("[YNAB API] Error:", error);
-    }
-    const errorMsg =
-      error && typeof error === "object" && "message" in error
-        ? (error as { message?: string }).message
-        : "Network error occurred while calling YNAB API";
-    throw new Error(errorMsg || "Network error occurred while calling YNAB API");
+  if (process.env.NODE_ENV === "development") {
+    // Minimal request logging
+    console.log("[YNAB API] Request:", {
+      method: options.method || "GET",
+      url,
+      headers,
+      body: options.body,
+    });
   }
+
+  let response: Response;
+  try {
+    response = await fetch(url, { ...options, headers });
+  } catch (err) {
+    throw new Error(
+      `Network error while contacting YNAB API: ${err instanceof Error && err.message ? err.message : String(err)}`
+    );
+  }
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`YNAB API error: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ""}`);
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    // Minimal response logging
+    const cloned = response.clone();
+    let responseBody: unknown;
+    try {
+      responseBody = await cloned.json();
+    } catch {
+      responseBody = await cloned.text();
+    }
+    console.log("[YNAB API] Response:", {
+      status: response.status,
+      statusText: response.statusText,
+      body: responseBody,
+    });
+  }
+
+  return response.json();
 }
