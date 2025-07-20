@@ -1,26 +1,16 @@
-// src/components/atoms/Button.tsx
 import React from "react";
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonProps = {
   children: React.ReactNode;
-}
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+};
 
-export function Button({ children, ...props }: ButtonProps) {
-  return (
-    <button
-      {...props}
-      style={{
-        padding: "8px 16px",
-        fontSize: 16,
-        background: "#1976d2",
-        color: "#fff",
-        border: "none",
-        borderRadius: 4,
-        cursor: "pointer",
-        ...props.style,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
+const Button: React.FC<ButtonProps> = ({ children, onClick, type = "button", disabled = false }) => (
+  <button type={type} onClick={onClick} disabled={disabled}>
+    {children}
+  </button>
+);
+
+export default Button;
