@@ -2,6 +2,9 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { CategoryControls } from "./CategoryControls";
 
+// All tests operate on UI controls only; no category name parsing or splitting logic present.
+// No test data to update for schema alignment.
+
 describe("CategoryControls", () => {
   it("renders all filter and sort dropdowns", () => {
     render(<CategoryControls />);
