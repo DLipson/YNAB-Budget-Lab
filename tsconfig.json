@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2015",
+    "module": "es2020",
+    "esModuleInterop": true,
     "types": ["vitest/globals"]
   },
   "files": [],
