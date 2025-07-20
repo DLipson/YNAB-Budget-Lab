@@ -1,22 +1,23 @@
-// Utility to parse category names in the format "Frequency:Priority:Fixed/Variable"
-
-export function parseCategoryName(name: string): {
-  name: string;
+/**
+ * Utility to parse category group names in the format "Frequency:Priority:Fixed/Variable"
+ * Operates on category_group_name, not category name.
+ */
+export function parseCategoryGroupName(category_group_name: string): {
+  category_group_name: string;
   frequency?: string;
   priority?: string;
   type?: string;
 } {
-  if (typeof name !== "string") {
-    return { name: String(name) };
+  if (typeof category_group_name !== "string") {
+    return { category_group_name: String(category_group_name) };
   }
 
-  const parts = name.split(":");
+  const parts = category_group_name.split(":");
   if (parts.length === 3) {
     const [frequency, priority, type] = parts.map((p) => p.trim());
-    // Basic validation: all parts must be non-empty
     if (frequency && priority && type) {
       return {
-        name,
+        category_group_name,
         frequency,
         priority,
         type,
@@ -24,6 +25,5 @@ export function parseCategoryName(name: string): {
     }
   }
 
-  // Invalid format or malformed input
-  return { name };
+  return { category_group_name };
 }
