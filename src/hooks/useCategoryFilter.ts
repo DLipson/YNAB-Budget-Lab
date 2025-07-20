@@ -28,14 +28,48 @@ export function useCategoryFilter({ categories, filterState, sortState }: UseCat
 
     // Apply filters (AND logic)
     if (filterState) {
-      filtered = filtered.filter((cat) => Object.entries(filterState).every(([key, value]) => cat[key] === value));
+      filtered = filtered.filter((cat) =>
+        Object.entries(filterState).every(([key, value]) => {
+          // Support filtering by segments in category_group_name
+          if (key === "frequency" || key === "priority" || key === "type") {
+            if (typeof cat.category_group_name === "string") {
+              const [frequency, priority, type] = cat.category_group_name.split(":").map((p: string) => p.trim());
+              if (key === "frequency") return frequency === value;
+              if (key === "priority") return priority === value;
+              if (key === "type") return type === value;
+            }
+            return false;
+          }
+          return cat[key] === value;
+        })
+      );
     }
 
     // Apply sorting
     if (sortState && sortState.key) {
       filtered = [...filtered].sort((a, b) => {
-        const aVal = a[sortState.key];
-        const bVal = b[sortState.key];
+        let aVal = a[sortState.key];
+        let bVal = b[sortState.key];
+
+        // Support sorting by segments in category_group_name
+        if (sortState.key === "frequency" || sortState.key === "priority" || sortState.key === "type") {
+          if (typeof a.category_group_name === "string" && typeof b.category_group_name === "string") {
+            const [aFreq, aPri, aType] = a.category_group_name.split(":").map((p: string) => p.trim());
+            const [bFreq, bPri, bType] = b.category_group_name.split(":").map((p: string) => p.trim());
+            if (sortState.key === "frequency") {
+              aVal = aFreq;
+              bVal = bFreq;
+            }
+            if (sortState.key === "priority") {
+              aVal = aPri;
+              bVal = bPri;
+            }
+            if (sortState.key === "type") {
+              aVal = aType;
+              bVal = bType;
+            }
+          }
+        }
 
         if (aVal === bVal) return 0;
 
