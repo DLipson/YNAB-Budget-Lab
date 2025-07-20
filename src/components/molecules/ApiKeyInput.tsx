@@ -1,37 +1,31 @@
-// src/components/molecules/ApiKeyInput.tsx
 import React, { useState } from "react";
-import { Input } from "../atoms/Input";
-import { Button } from "../atoms/Button";
-import { useAuth } from "../../hooks/useAuth";
+import Input from "../atoms/Input";
+import Button from "../atoms/Button";
 
-export function ApiKeyInput() {
-  const { validateApiKey, loading, error, isAuthenticated } = useAuth();
-  const [key, setKey] = useState("");
+type ApiKeyInputProps = {
+  onSubmit: (apiKey: string) => void;
+};
 
-  function handleSubmit(e: React.FormEvent) {
+const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ onSubmit }) => {
+  const [apiKey, setApiKey] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setApiKey(e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    validateApiKey(key);
-  }
-
-  if (isAuthenticated) {
-    return <div>Authenticated!</div>;
-  }
+    onSubmit(apiKey);
+  };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 400, margin: "0 auto" }}>
-      <Input
-        label="YNAB API Key"
-        value={key}
-        onChange={(e) => setKey(e.target.value)}
-        disabled={loading}
-        required
-        type="text"
-        autoFocus
-      />
-      <Button type="submit" disabled={loading || !key}>
-        {loading ? "Validating..." : "Authenticate"}
+    <form onSubmit={handleSubmit}>
+      <Input value={apiKey} onChange={handleChange} type="text" placeholder="Enter API key" />
+      <Button type="submit" disabled={!apiKey}>
+        Submit
       </Button>
-      {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
     </form>
   );
-}
+};
+
+export default ApiKeyInput;
