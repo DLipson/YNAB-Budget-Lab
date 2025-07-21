@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { CategoryTable } from "./CategoryTable";
 import { vi } from "vitest";
@@ -43,7 +43,8 @@ describe("CategoryTable", () => {
 
   it("renders checkboxes for each row", () => {
     render(<CategoryTable categories={categories} />);
-    expect(screen.getAllByRole("checkbox").length).toBe(categories.length);
+    // There are now two checkboxes per row: select and scenario toggle
+    expect(screen.getAllByRole("checkbox").length).toBe(categories.length * 2);
   });
 
   it("enables and disables Copy to Spreadsheet button", () => {
@@ -66,6 +67,23 @@ describe("CategoryTable", () => {
     checkboxes[0].click();
     checkboxes[1].click();
     const button = screen.getByRole("button", { name: /Copy selected amounts to spreadsheet/i });
+    // Enable scenario for both categories before copying
+    const scenarioToggles = screen.getAllByLabelText(/Toggle scenario for/i);
+    scenarioToggles.forEach((toggle) => {
+      const input = toggle as HTMLInputElement;
+      if (!input.checked) {
+        input.click();
+      }
+    });
+    // Enable scenario for both categories before copying
+    scenarioToggles.forEach((toggle) => {
+      const input = toggle as HTMLInputElement;
+      if (!input.checked) {
+        act(() => {
+          input.click();
+        });
+      }
+    });
     button.click();
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith("=100 + 2000");
   });
@@ -113,10 +131,11 @@ describe("CategoryTable", () => {
     render(<CategoryTable categories={[variableCat]} />);
     const adjustInput = screen.getByLabelText(/Adjust amount for/i) as HTMLInputElement;
     expect(adjustInput).toHaveValue(100);
-    adjustInput.focus();
-    adjustInput.setSelectionRange(0, 3);
-    adjustInput.value = "150";
-    adjustInput.dispatchEvent(new Event("input", { bubbles: true }));
+    act(() => {
+      adjustInput.focus();
+      adjustInput.value = "150";
+      adjustInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
     expect(adjustInput).toHaveValue(150);
   });
 
@@ -130,8 +149,10 @@ describe("CategoryTable", () => {
     const scenarioToggles = screen.getAllByLabelText(/Toggle scenario for/i);
     scenarioToggles[0].click();
     const resetButton = screen.getByRole("button", { name: /Reset scenario planning/i });
-    resetButton.click();
-    expect(scenarioToggles[0]).toBeChecked();
+    act(() => {
+      resetButton.click();
+    });
+    expect((scenarioToggles[0] as HTMLInputElement).checked).toBe(true);
   });
 });
 
