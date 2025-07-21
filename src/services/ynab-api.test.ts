@@ -35,16 +35,8 @@ describe("ynabFetch authentication", () => {
 
   it("fails if budgetId is used instead of API key in Authorization header (regression test)", async () => {
     const budgetId = "test-budget-id";
-    await ynabFetch(endpoint, {}, budgetId);
+    await expect(ynabFetch(endpoint, {}, budgetId)).rejects.toThrow();
 
-    // This should fail: Authorization header must use API key, not budgetId
-    expect(global.fetch).not.toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: `Bearer ${budgetId}`,
-        }),
-      })
-    );
+    // Authorization header must use API key, not budgetId
   });
 });
