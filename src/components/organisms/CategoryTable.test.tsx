@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { CategoryTable } from "./CategoryTable";
+import { vi } from "vitest";
 
 describe("CategoryTable", () => {
   const categories = [
@@ -47,7 +48,7 @@ describe("CategoryTable", () => {
 
   it("enables and disables Copy to Spreadsheet button", () => {
     render(<CategoryTable categories={categories} />);
-    const button = screen.getByRole("button", { name: /Copy to Spreadsheet/i });
+    const button = screen.getByRole("button", { name: /Copy selected amounts to spreadsheet/i });
     expect(button).toBeDisabled();
     const checkboxes = screen.getAllByRole("checkbox");
     checkboxes[0].click();
@@ -57,14 +58,14 @@ describe("CategoryTable", () => {
   it("copies selected amounts as formula to clipboard", async () => {
     Object.assign(navigator, {
       clipboard: {
-        writeText: jest.fn(),
+        writeText: vi.fn(),
       },
     });
     render(<CategoryTable categories={categories} />);
     const checkboxes = screen.getAllByRole("checkbox");
     checkboxes[0].click();
     checkboxes[1].click();
-    const button = screen.getByRole("button", { name: /Copy to Spreadsheet/i });
+    const button = screen.getByRole("button", { name: /Copy selected amounts to spreadsheet/i });
     button.click();
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith("=100 + 2000");
   });
@@ -93,6 +94,44 @@ describe("CategoryTable", () => {
   it("shows empty state", () => {
     render(<CategoryTable categories={[]} />);
     expect(screen.getByText(/no categories|empty|no data|no items/i)).toBeInTheDocument();
+  });
+
+  it("toggles scenario for a category", () => {
+    render(<CategoryTable categories={categories} />);
+    const scenarioToggles = screen.getAllByLabelText(/Toggle scenario for/i);
+    expect(scenarioToggles[0]).toBeChecked();
+    scenarioToggles[0].click();
+    expect(scenarioToggles[0]).not.toBeChecked();
+  });
+
+  it("adjusts variable category amount", () => {
+    const variableCat = {
+      ...categories[0],
+      category_group_name: "Monthly:High:Variable",
+      type: "Variable",
+    };
+    render(<CategoryTable categories={[variableCat]} />);
+    const adjustInput = screen.getByLabelText(/Adjust amount for/i) as HTMLInputElement;
+    expect(adjustInput).toHaveValue(100);
+    adjustInput.focus();
+    adjustInput.setSelectionRange(0, 3);
+    adjustInput.value = "150";
+    adjustInput.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(adjustInput).toHaveValue(150);
+  });
+
+  it("shows real-time total calculation", () => {
+    render(<CategoryTable categories={categories} />);
+    expect(screen.getByText(/Total:/)).toHaveTextContent("Total: 2100");
+  });
+
+  it("resets scenario planning to defaults", () => {
+    render(<CategoryTable categories={categories} />);
+    const scenarioToggles = screen.getAllByLabelText(/Toggle scenario for/i);
+    scenarioToggles[0].click();
+    const resetButton = screen.getByRole("button", { name: /Reset scenario planning/i });
+    resetButton.click();
+    expect(scenarioToggles[0]).toBeChecked();
   });
 });
 

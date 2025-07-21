@@ -25,7 +25,27 @@ export function CategoryTable({
   onRetry,
 }: CategoryTableProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const columns = ["Select", "Category Name", "Amount", "Frequency", "Priority", "Type"];
+  const [scenarioEnabled, setScenarioEnabled] = useState<Record<string, boolean>>({});
+  const [adjustedValues, setAdjustedValues] = useState<Record<string, number>>({});
+  const [defaults, setDefaults] = useState<Record<string, number>>({});
+
+  // Initialize defaults on mount
+  React.useEffect(() => {
+    const initialDefaults: Record<string, number> = {};
+    categories.forEach((cat) => {
+      initialDefaults[cat.id] = cat.budgeted;
+    });
+    setDefaults(initialDefaults);
+    setAdjustedValues(initialDefaults);
+    // Enable all by default
+    const initialEnabled: Record<string, boolean> = {};
+    categories.forEach((cat) => {
+      initialEnabled[cat.id] = true;
+    });
+    setScenarioEnabled(initialEnabled);
+  }, [categories]);
+
+  const columns = ["Select", "Scenario", "Category Name", "Amount", "Frequency", "Priority", "Type", "Adjust"];
 
   if (isLoading) {
     return <CategoryTableSkeleton columns={columns.slice(1)} />;
@@ -51,8 +71,33 @@ export function CategoryTable({
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
+  const handleToggleScenario = (id: string) => {
+    setScenarioEnabled((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleAdjustValue = (id: string, value: number) => {
+    setAdjustedValues((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleReset = () => {
+    setAdjustedValues(defaults);
+    const enabled: Record<string, boolean> = {};
+    Object.keys(defaults).forEach((id) => {
+      enabled[id] = true;
+    });
+    setScenarioEnabled(enabled);
+  };
+
   const data = categories.map((category) => {
     const parsedGroup = parseCategoryGroupName(category.category_group_name ?? "");
+    const type = parsedGroup.type ?? category.type ?? "";
+    const isVariable = type.toLowerCase() === "variable";
     return [
       <input
         type="checkbox"
@@ -60,13 +105,37 @@ export function CategoryTable({
         onChange={() => handleSelect(category.id)}
         aria-label={`Select ${category.name}`}
       />,
+      <input
+        type="checkbox"
+        checked={scenarioEnabled[category.id] ?? true}
+        onChange={() => handleToggleScenario(category.id)}
+        aria-label={`Toggle scenario for ${category.name}`}
+      />,
       <span>{String(category.name)}</span>,
-      <span>{String(category.budgeted)}</span>,
+      <span>{scenarioEnabled[category.id] ? adjustedValues[category.id] : 0}</span>,
       <span>{String(parsedGroup.frequency ?? category.frequency ?? "")}</span>,
       <span>{String(parsedGroup.priority ?? category.priority ?? "")}</span>,
-      <span>{String(parsedGroup.type ?? category.type ?? "")}</span>,
+      <span>{String(type)}</span>,
+      isVariable && scenarioEnabled[category.id] ? (
+        <input
+          type="number"
+          value={adjustedValues[category.id]}
+          min={0}
+          style={{ width: "80px" }}
+          onChange={(e) => handleAdjustValue(category.id, Number(e.target.value))}
+          aria-label={`Adjust amount for ${category.name}`}
+        />
+      ) : (
+        <span>-</span>
+      ),
     ];
   });
+
+  // Real-time total calculation
+  const total = categories.reduce(
+    (sum, cat) => (scenarioEnabled[cat.id] ? sum + (adjustedValues[cat.id] ?? cat.budgeted) : sum),
+    0
+  );
 
   return (
     <Block
@@ -84,29 +153,51 @@ export function CategoryTable({
       }}
     >
       <Table columns={columns} data={data} />
-      <Block marginTop="scale600">
-        <button
-          type="button"
-          disabled={selectedIds.length === 0}
-          onClick={() => {
-            const selectedAmounts = categories.filter((cat) => selectedIds.includes(cat.id)).map((cat) => cat.budgeted);
-            if (selectedAmounts.length === 0) return;
-            const formula = "=" + selectedAmounts.join(" + ");
-            navigator.clipboard.writeText(formula);
-          }}
-          style={{
-            padding: "0.5rem 1rem",
-            background: "#276ef1",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            cursor: selectedIds.length === 0 ? "not-allowed" : "pointer",
-            fontWeight: 500,
-          }}
-          aria-label="Copy selected amounts to spreadsheet"
-        >
-          Copy to Spreadsheet
-        </button>
+      <Block marginTop="scale600" display="flex" alignItems="center" justifyContent="space-between">
+        <div>
+          <button
+            type="button"
+            disabled={selectedIds.length === 0}
+            onClick={() => {
+              const selectedAmounts = categories
+                .filter((cat) => selectedIds.includes(cat.id))
+                .map((cat) => (scenarioEnabled[cat.id] ? adjustedValues[cat.id] ?? cat.budgeted : 0));
+              if (selectedAmounts.length === 0) return;
+              const formula = "=" + selectedAmounts.join(" + ");
+              navigator.clipboard.writeText(formula);
+            }}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#276ef1",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: selectedIds.length === 0 ? "not-allowed" : "pointer",
+              fontWeight: 500,
+              marginRight: "1rem",
+            }}
+            aria-label="Copy selected amounts to spreadsheet"
+          >
+            Copy to Spreadsheet
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#e2e2e2",
+              color: "#333",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+            aria-label="Reset scenario planning"
+          >
+            Reset
+          </button>
+        </div>
+        <div style={{ fontWeight: 600, fontSize: "1.1rem" }}>Total: {total}</div>
       </Block>
     </Block>
   );
