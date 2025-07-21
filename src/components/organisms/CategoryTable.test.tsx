@@ -82,6 +82,91 @@ describe("CategoryTable", () => {
         act(() => {
           input.click();
         });
+        it("toggles scenario for all categories in a group", () => {
+          render(<CategoryTable categories={categories} />);
+          const groupToggle = screen.getByLabelText(/Toggle scenario for group Monthly:High:Expense/i);
+          const scenarioToggles = screen
+            .getAllByLabelText(/Toggle scenario for /i)
+            .filter((el) => !el.getAttribute("aria-label")?.includes("group"));
+          // Disable all in group
+          act(() => {
+            (groupToggle as HTMLInputElement).click();
+          });
+          scenarioToggles.forEach((toggle) => {
+            expect((toggle as HTMLInputElement).checked).toBe(false);
+          });
+          // Enable all in group
+          act(() => {
+            (groupToggle as HTMLInputElement).click();
+          });
+          scenarioToggles.forEach((toggle) => {
+            expect((toggle as HTMLInputElement).checked).toBe(true);
+          });
+        });
+
+        it("adjusts variable category amount and updates total", () => {
+          const variableCategory = {
+            id: "3",
+            name: "Dining Out",
+            category_group_id: "cg1",
+            category_group_name: "Monthly:High:Variable",
+            budgeted: 50,
+            activity: -30,
+            balance: 20,
+            frequency: "Monthly",
+            priority: "High",
+            type: "Variable",
+          };
+          render(<CategoryTable categories={[...categories, variableCategory]} />);
+          const input = screen.getByLabelText("Adjust amount for Dining Out") as HTMLInputElement;
+          act(() => {
+            input.value = "75";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+          expect(input.value).toBe("75");
+          expect(screen.getByText(/Total:/i)).toHaveTextContent("Total: 2175");
+        });
+
+        it("reset button restores defaults", () => {
+          render(<CategoryTable categories={categories} />);
+          const scenarioToggles = screen
+            .getAllByLabelText(/Toggle scenario for /i)
+            .filter((el) => !el.getAttribute("aria-label")?.includes("group"));
+          act(() => {
+            scenarioToggles.forEach((toggle) => {
+              if ((toggle as HTMLInputElement).checked) {
+                (toggle as HTMLInputElement).click();
+              }
+            });
+          });
+          const resetButton = screen.getByRole("button", { name: /Reset scenario planning/i });
+          act(() => {
+            resetButton.click();
+          });
+          scenarioToggles.forEach((toggle) => {
+            expect((toggle as HTMLInputElement).checked).toBe(true);
+          });
+          expect(screen.getByText("100")).toBeInTheDocument();
+          expect(screen.getByText("2000")).toBeInTheDocument();
+        });
+
+        it("real-time total updates when scenario toggles or adjustments change", () => {
+          render(<CategoryTable categories={categories} />);
+          const scenarioToggles = screen
+            .getAllByLabelText(/Toggle scenario for /i)
+            .filter((el) => !el.getAttribute("aria-label")?.includes("group"));
+          // Disable first category
+          act(() => {
+            (scenarioToggles[0] as HTMLInputElement).click();
+          });
+          expect(screen.getByText(/Total:/i)).toHaveTextContent("Total: 2000");
+          // Enable again
+          act(() => {
+            (scenarioToggles[0] as HTMLInputElement).click();
+          });
+          expect(screen.getByText(/Total:/i)).toHaveTextContent("Total: 2100");
+        });
       }
     });
     button.click();
