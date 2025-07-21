@@ -3,8 +3,8 @@
 import { useState, useCallback } from "react";
 
 type UseAuthReturn = {
-  apiKey: string;
-  setApiKey: (key: string) => void;
+  token: string;
+  setToken: (key: string) => void;
   isValid: boolean;
   validateApiKey: (key?: string) => boolean;
   isAuthenticated: boolean;
@@ -13,13 +13,13 @@ type UseAuthReturn = {
 const API_KEY_REGEX = /^[a-zA-Z0-9_-]{32,64}$/;
 
 export function useAuth(): UseAuthReturn & { error?: string } {
-  const [apiKey, setApiKey] = useState("");
+  const [token, setToken] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
   const validateApiKey = useCallback(
     (key?: string) => {
-      const value = key ?? apiKey;
+      const value = key ?? token;
       const valid = API_KEY_REGEX.test(value);
       setIsValid(valid);
       if (!valid && value) {
@@ -29,15 +29,15 @@ export function useAuth(): UseAuthReturn & { error?: string } {
       }
       return valid;
     },
-    [apiKey]
+    [token]
   );
 
-  const isAuthenticated = isValid && !!apiKey;
+  const isAuthenticated = isValid && !!token;
 
   return {
-    apiKey,
-    setApiKey: (key: string) => {
-      setApiKey(key);
+    token,
+    setToken: (key: string) => {
+      setToken(key);
       validateApiKey(key);
     },
     isValid,

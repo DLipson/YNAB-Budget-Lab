@@ -14,7 +14,11 @@ let windowStart = Date.now();
 const MAX_REQUESTS_PER_HOUR = 200;
 const WINDOW_MS = 60 * 60 * 1000;
 
-export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function ynabFetch<T = YnabApiResponse>(
+  endpoint: string,
+  options: RequestInit = {},
+  token?: string
+): Promise<T> {
   const now = Date.now();
   if (now - windowStart >= WINDOW_MS) {
     windowStart = now;
@@ -25,8 +29,17 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
   }
   requestCount++;
 
+  // Log token presence (masked)
+  if (process.env.NODE_ENV === "development") {
+    console.log("[YNAB API] Token present:", !!token, "Token (masked):", token ? token.slice(0, 4) + "***" : "none");
+  }
+
   const url = `${YNAB_API_BASE_URL}${endpoint}`;
-  const headers = { ...getYnabApiHeaders(), ...options.headers };
+  const headers = {
+    ...getYnabApiHeaders(),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
 
   if (process.env.NODE_ENV === "development") {
     console.log("[YNAB API] Request:", {
@@ -42,11 +55,17 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       response = await fetch(url, { ...options, headers });
+      if (process.env.NODE_ENV === "development") {
+        console.log("[YNAB API] Response status:", response.status);
+      }
       break;
     } catch (err) {
       lastError = new Error(
         `Network error while contacting YNAB API: ${err instanceof Error && err.message ? err.message : String(err)}`
       );
+      if (process.env.NODE_ENV === "development") {
+        console.error("[YNAB API] Network error:", lastError);
+      }
       if (attempt === 0) {
         await new Promise((res) => setTimeout(res, 1000)); // Wait 1s before retry
       }
@@ -82,10 +101,36 @@ export async function ynabFetch<T = YnabApiResponse>(endpoint: string, options: 
  * Fetches the list of budgets from the YNAB API.
  * Returns an array of BudgetSummary objects.
  */
-export async function fetchBudgets(): Promise<BudgetSummary[]> {
-  const response = await ynabFetch<YnabApiResponse<{ budgets: BudgetSummary[] }>>("/budgets");
+export async function fetchBudgets(token: string): Promise<BudgetSummary[]> {
+  const response = await ynabFetch<YnabApiResponse<{ budgets: BudgetSummary[] }>>("/budgets", {}, token);
   if (response.error) {
     throw new Error(`YNAB API error: ${response.error.detail}`);
   }
   return response.data.budgets;
+}
+
+/**
+ * Fetches categories for a given budget from the YNAB API.
+ * Returns an array of Category objects.
+ */
+import type { Category } from "../types/ynab";
+export async function fetchCategories(token: string, budgetId: string): Promise<Category[]> {
+  const response = await ynabFetch<YnabApiResponse<{ categories: Category[] }>>(
+    `/budgets/${budgetId}/categories`,
+    {},
+    token
+  );
+  if (response.error) {
+    throw new Error(`YNAB API error: ${response.error.detail}`);
+  }
+  // YNAB API returns categories in groups, flatten them
+  if ("categories" in response.data && Array.isArray(response.data.categories)) {
+    // Flat array case
+    return response.data.categories as Category[];
+  }
+  if ("category_groups" in response.data && Array.isArray(response.data.category_groups)) {
+    // Grouped case
+    return (response.data.category_groups as { categories: Category[] }[]).flatMap((g) => g.categories);
+  }
+  return [];
 }

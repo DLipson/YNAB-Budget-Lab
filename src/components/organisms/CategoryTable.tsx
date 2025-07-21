@@ -36,6 +36,13 @@ export function CategoryTable({
     return <CategoryEmptyState filterActive={filterActive} />;
   }
 
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      "[CategoryTable] Received categories:",
+      Array.isArray(categories) ? categories.length : categories,
+      categories
+    );
+  }
   const data = categories.map((category) => {
     const parsedGroup = parseCategoryGroupName(category.category_group_name ?? "");
     return [

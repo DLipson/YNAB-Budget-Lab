@@ -40,3 +40,17 @@ export interface Category {
   // Add more fields as needed
   [key: string]: unknown;
 }
+
+// YNAB API: Category Groups response
+export interface CategoryGroup {
+  id: string;
+  name: string;
+  hidden: boolean;
+  deleted: boolean;
+  categories: Category[];
+  [key: string]: unknown;
+}
+
+export interface CategoryGroupsResponse {
+  category_groups: CategoryGroup[];
+}
