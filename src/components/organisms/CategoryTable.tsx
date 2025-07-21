@@ -96,7 +96,7 @@ export function CategoryTable({
 
   const data = categories.map((category) => {
     const parsedGroup = parseCategoryGroupName(category.category_group_name ?? "");
-    const type = parsedGroup.type ?? category.type ?? "";
+    const type = String(parsedGroup.type ?? category.type ?? "");
     const isVariable = type.toLowerCase() === "variable";
     return [
       <input
