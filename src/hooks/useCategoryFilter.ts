@@ -23,7 +23,7 @@ interface UseCategoryFilterParams {
  */
 export function useCategoryFilter({ categories, filterState, sortState }: UseCategoryFilterParams): Category[] {
   return useMemo(() => {
-    let filtered = categories;
+    let filtered = categories ?? [];
 
     if (filterState) {
       filtered = filtered.filter((cat) =>
