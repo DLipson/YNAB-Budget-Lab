@@ -31,7 +31,7 @@ export async function ynabFetch<T = YnabApiResponse>(
 
   // Log token presence (masked)
   if (process.env.NODE_ENV === "development") {
-    console.log("[YNAB API] Token present:", !!token, "Token (masked):", token ? token.slice(0, 4) + "***" : "none");
+    console.log("[YNAB API] Token:", typeof token === "string" ? token.slice(0, 4) + "***" : "none");
   }
 
   const url = `${YNAB_API_BASE_URL}${endpoint}`;
@@ -125,22 +125,6 @@ export async function fetchCategories(token: string, budgetId: string): Promise<
   }
   return response.data.categories;
 }
-    token
-  );
-  if (response.error) {
-    throw new Error(`YNAB API error: ${response.error.detail}`);
-  }
-  // YNAB API returns categories in groups, flatten them
-  if ("categories" in response.data && Array.isArray(response.data.categories)) {
-    // Flat array case
-    return response.data.categories as Category[];
-  }
-  if ("category_groups" in response.data && Array.isArray(response.data.category_groups)) {
-    // Grouped case
-    return (response.data.category_groups as { categories: Category[] }[]).flatMap((g) => g.categories);
-  }
-  return [];
-}
 
 /**
  * Fetches transactions for a given budget and category, with paging.
@@ -164,9 +148,7 @@ export async function fetchTransactions(
     throw new Error(`YNAB API error: ${response.error.detail}`);
   }
   // Filter by categoryId
-  const filtered = response.data.transactions.filter(
-    (tx) => tx.category_id === categoryId
-  );
+  const filtered = response.data.transactions.filter((tx) => tx.category_id === categoryId);
   const paged = filtered.slice(offset, offset + pageSize);
   return { transactions: paged, total: filtered.length };
 }
