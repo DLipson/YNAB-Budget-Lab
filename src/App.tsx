@@ -71,9 +71,11 @@ function App() {
         console.log("[App] Fetching categories for budgetId:", budgetId);
       }
       try {
-        const apiResponse = await fetchCategories(token as string, budgetId as string);
-        const categoryGroups = apiResponse?.data?.category_groups ?? [];
-        const allCategories = categoryGroups.flatMap((g) => g.categories ?? []);
+        const categoryGroups: import("./types/ynab").CategoryGroup[] = await fetchCategories(
+          token as string,
+          budgetId as string
+        );
+        const allCategories = categoryGroups.flatMap((g: import("./types/ynab").CategoryGroup) => g.categories ?? []);
         if (process.env.NODE_ENV === "development") {
           for (let i = 0; i < Math.min(3, categoryGroups.length); i++) {
             const group = categoryGroups[i];
