@@ -71,12 +71,22 @@ function App() {
         console.log("[App] Fetching categories for budgetId:", budgetId);
       }
       try {
-        const cats = await fetchCategories(token as string, budgetId as string);
+        const apiResponse = await fetchCategories(token as string, budgetId as string);
+        const categoryGroups = apiResponse?.data?.category_groups ?? [];
+        const allCategories = categoryGroups.flatMap((g) => g.categories ?? []);
+        if (process.env.NODE_ENV === "development") {
+          for (let i = 0; i < Math.min(3, categoryGroups.length); i++) {
+            const group = categoryGroups[i];
+            const firstThreeCats = Array.isArray(group.categories) ? group.categories.slice(0, 3) : [];
+            console.log(`[App] category_group[${i}]:`, group);
+            console.log(`[App] category_group[${i}].categories (first 3):`, firstThreeCats);
+          }
+        }
         if (isMounted) {
-          setCategories(cats);
+          setCategories(allCategories);
           setLoading(false);
           if (process.env.NODE_ENV === "development") {
-            console.log("[App] Categories loaded:", cats.length);
+            console.log("[App] Categories loaded:", allCategories.length);
           }
         }
       } catch (err) {
