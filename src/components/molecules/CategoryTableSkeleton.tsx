@@ -1,4 +1,3 @@
-import React from "react";
 import { Table } from "baseui/table";
 import { Skeleton } from "baseui/skeleton";
 

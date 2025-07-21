@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./CategoryError.module.css";
 import { RetryButton } from "../atoms/RetryButton";
 

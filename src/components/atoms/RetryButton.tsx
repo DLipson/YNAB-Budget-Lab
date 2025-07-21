@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./RetryButton.module.css";
 
 interface RetryButtonProps {
