@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import * as useAuthModule from "./hooks/useAuth";
 import App from "./App";
 
@@ -99,7 +99,7 @@ describe("App categories state", () => {
         server_knowledge: 0,
       },
     };
-    jest.spyOn(ynabApi, "fetchBudgets").mockResolvedValue([
+    vi.spyOn(ynabApi, "fetchBudgets").mockResolvedValue([
       {
         id: "budget1",
         name: "Budget 1",
@@ -108,15 +108,21 @@ describe("App categories state", () => {
         last_month: "2025-07",
       } as BudgetSummary,
     ]);
-    jest
-      .spyOn(ynabApi, "fetchCategories")
-      .mockResolvedValue(mockApiResponse.data.category_groups.flatMap((g) => g.categories));
+    vi.spyOn(ynabApi, "fetchCategories").mockResolvedValue(mockApiResponse.data.category_groups);
 
+    mockUseAuth({ isAuthenticated: true, token: "validtoken" });
     render(<App />);
-    await waitFor(() => {
-      expect(screen.queryByText("TestCat")).toBeInTheDocument();
-      expect(screen.queryByText("TestCat2")).toBeInTheDocument();
-      expect(screen.queryByText("TestCat3")).toBeInTheDocument();
-    });
+    screen.debug();
+    await new Promise((res) => setTimeout(res, 100));
+    const testCatCell = await screen.findByRole("gridcell", { name: "TestCat" });
+    expect(testCatCell).toBeInTheDocument();
+    await new Promise((res) => setTimeout(res, 100));
+    const testCat2Cell = await screen.findByRole("gridcell", { name: "TestCat2" });
+    expect(testCat2Cell).toBeInTheDocument();
+    expect(screen.queryByText("200")).toBeInTheDocument();
+    await new Promise((res) => setTimeout(res, 100));
+    const testCat3Cell = await screen.findByRole("gridcell", { name: "TestCat3" });
+    expect(testCat3Cell).toBeInTheDocument();
+    expect(screen.queryByText("300")).toBeInTheDocument();
   });
 });
