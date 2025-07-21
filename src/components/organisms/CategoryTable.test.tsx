@@ -31,14 +31,43 @@ describe("CategoryTable", () => {
     },
   ];
 
-  it("renders all columns", () => {
+  it("renders all columns including group name", () => {
     render(<CategoryTable categories={categories} />);
     expect(screen.getByText("Select")).toBeInTheDocument();
     expect(screen.getByText("Category Name")).toBeInTheDocument();
+    expect(screen.getByText("Group Name")).toBeInTheDocument();
     expect(screen.getByText("Amount")).toBeInTheDocument();
     expect(screen.getByText("Frequency")).toBeInTheDocument();
     expect(screen.getByText("Priority")).toBeInTheDocument();
     expect(screen.getByText("Type")).toBeInTheDocument();
+  });
+
+  it("renders group name and segments for valid group", () => {
+    render(<CategoryTable categories={categories} />);
+    expect(screen.getByText("Monthly:High:Expense")).toBeInTheDocument();
+    expect(screen.getByText("Monthly")).toBeInTheDocument();
+    expect(screen.getByText("High")).toBeInTheDocument();
+    expect(screen.getByText("Expense")).toBeInTheDocument();
+  });
+
+  it("renders raw group name and leaves segments empty for malformed group", () => {
+    const malformed = [
+      {
+        id: "3",
+        name: "Misc",
+        category_group_id: "cg3",
+        category_group_name: "UnsegmentedGroup",
+        budgeted: 50,
+        activity: -10,
+        balance: 40,
+        type: "Expense",
+      },
+    ];
+    render(<CategoryTable categories={malformed} />);
+    expect(screen.getByText("UnsegmentedGroup")).toBeInTheDocument();
+    // Segments should be empty
+    const cells = screen.getAllByText("");
+    expect(cells.length).toBeGreaterThanOrEqual(3);
   });
 
   it("renders checkboxes for each row", () => {

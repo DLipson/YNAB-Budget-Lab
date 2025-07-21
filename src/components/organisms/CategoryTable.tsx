@@ -45,7 +45,17 @@ export function CategoryTable({
     setScenarioEnabled(initialEnabled);
   }, [categories]);
 
-  const columns = ["Select", "Scenario", "Category Name", "Amount", "Frequency", "Priority", "Type", "Adjust"];
+  const columns = [
+    "Select",
+    "Scenario",
+    "Category Name",
+    "Group Name",
+    "Amount",
+    "Frequency",
+    "Priority",
+    "Type",
+    "Adjust",
+  ];
 
   if (isLoading) {
     return <CategoryTableSkeleton columns={columns.slice(1)} />;
@@ -96,6 +106,7 @@ export function CategoryTable({
 
   const data = categories.map((category) => {
     const parsedGroup = parseCategoryGroupName(category.category_group_name ?? "");
+    const isValidGroup = parsedGroup.frequency && parsedGroup.priority && parsedGroup.type;
     const type = String(parsedGroup.type ?? category.type ?? "");
     const isVariable = type.toLowerCase() === "variable";
     return [
@@ -112,10 +123,11 @@ export function CategoryTable({
         aria-label={`Toggle scenario for ${category.name}`}
       />,
       <span>{String(category.name)}</span>,
+      <span>{category.category_group_name}</span>,
       <span>{scenarioEnabled[category.id] ? adjustedValues[category.id] : 0}</span>,
-      <span>{String(parsedGroup.frequency ?? category.frequency ?? "")}</span>,
-      <span>{String(parsedGroup.priority ?? category.priority ?? "")}</span>,
-      <span>{String(type)}</span>,
+      <span>{isValidGroup ? parsedGroup.frequency : ""}</span>,
+      <span>{isValidGroup ? parsedGroup.priority : ""}</span>,
+      <span>{isValidGroup ? parsedGroup.type : ""}</span>,
       isVariable && scenarioEnabled[category.id] ? (
         <input
           type="number"

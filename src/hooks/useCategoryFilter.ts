@@ -30,6 +30,8 @@ export function useCategoryFilter({ categories, filterState, sortState }: UseCat
         Object.entries(filterState).every(([key, value]) => {
           if (key === "frequency" || key === "priority" || key === "type") {
             const parsed = parseCategoryGroupName(cat.category_group_name);
+            // Exclude malformed/non-segmented group names from segment filtering
+            if (!parsed.frequency || !parsed.priority || !parsed.type) return false;
             return parsed[key] === value;
           }
           return cat[key] === value;
@@ -46,6 +48,9 @@ export function useCategoryFilter({ categories, filterState, sortState }: UseCat
           if (sortState.key === "frequency" || sortState.key === "priority" || sortState.key === "type") {
             const aParsed = parseCategoryGroupName(a.category_group_name);
             const bParsed = parseCategoryGroupName(b.category_group_name);
+            // Exclude malformed/non-segmented group names from segment sorting
+            if (!aParsed.frequency || !aParsed.priority || !aParsed.type) return 1;
+            if (!bParsed.frequency || !bParsed.priority || !bParsed.type) return -1;
             aVal = aParsed[sortState.key];
             bVal = bParsed[sortState.key];
           }

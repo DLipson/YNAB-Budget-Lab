@@ -66,6 +66,65 @@ describe("useCategoryFilter", () => {
     const result = runHook(() => useCategoryFilter({ categories }));
     expect(result).toHaveLength(4);
   });
+  it("excludes malformed/non-segmented group names from segment filtering", () => {
+    const testCategories: Category[] = [
+      {
+        id: "1",
+        name: "Valid",
+        category_group_id: "cg1",
+        category_group_name: "Monthly:High:Expense",
+        budgeted: 100,
+        activity: 0,
+        balance: 100,
+      },
+      {
+        id: "2",
+        name: "Malformed",
+        category_group_id: "cg2",
+        category_group_name: "UnsegmentedGroup",
+        budgeted: 50,
+        activity: 0,
+        balance: 50,
+      },
+    ];
+    const result = runHook(() =>
+      useCategoryFilter({
+        categories: testCategories,
+        filterState: { frequency: "Monthly" },
+      })
+    );
+    expect(result.map((c) => c.name)).toEqual(["Valid"]);
+  });
+
+  it("excludes malformed/non-segmented group names from segment sorting", () => {
+    const testCategories: Category[] = [
+      {
+        id: "1",
+        name: "Valid",
+        category_group_id: "cg1",
+        category_group_name: "Monthly:High:Expense",
+        budgeted: 100,
+        activity: 0,
+        balance: 100,
+      },
+      {
+        id: "2",
+        name: "Malformed",
+        category_group_id: "cg2",
+        category_group_name: "UnsegmentedGroup",
+        budgeted: 50,
+        activity: 0,
+        balance: 50,
+      },
+    ];
+    const result = runHook(() =>
+      useCategoryFilter({
+        categories: testCategories,
+        sortState: { key: "frequency", direction: "asc" },
+      })
+    );
+    expect(result[0].name).toEqual("Valid");
+  });
 
   it("filters by single field", () => {
     const result = runHook(() => useCategoryFilter({ categories, filterState: { category_group_id: "g1" } }));
