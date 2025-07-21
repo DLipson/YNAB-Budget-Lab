@@ -32,11 +32,41 @@ describe("CategoryTable", () => {
 
   it("renders all columns", () => {
     render(<CategoryTable categories={categories} />);
+    expect(screen.getByText("Select")).toBeInTheDocument();
     expect(screen.getByText("Category Name")).toBeInTheDocument();
     expect(screen.getByText("Amount")).toBeInTheDocument();
     expect(screen.getByText("Frequency")).toBeInTheDocument();
     expect(screen.getByText("Priority")).toBeInTheDocument();
     expect(screen.getByText("Type")).toBeInTheDocument();
+  });
+
+  it("renders checkboxes for each row", () => {
+    render(<CategoryTable categories={categories} />);
+    expect(screen.getAllByRole("checkbox").length).toBe(categories.length);
+  });
+
+  it("enables and disables Copy to Spreadsheet button", () => {
+    render(<CategoryTable categories={categories} />);
+    const button = screen.getByRole("button", { name: /Copy to Spreadsheet/i });
+    expect(button).toBeDisabled();
+    const checkboxes = screen.getAllByRole("checkbox");
+    checkboxes[0].click();
+    expect(button).not.toBeDisabled();
+  });
+
+  it("copies selected amounts as formula to clipboard", async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn(),
+      },
+    });
+    render(<CategoryTable categories={categories} />);
+    const checkboxes = screen.getAllByRole("checkbox");
+    checkboxes[0].click();
+    checkboxes[1].click();
+    const button = screen.getByRole("button", { name: /Copy to Spreadsheet/i });
+    button.click();
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith("=100 + 2000");
   });
 
   it("renders category rows", () => {

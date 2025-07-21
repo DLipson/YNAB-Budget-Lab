@@ -15,6 +15,8 @@ interface CategoryTableProps {
   onRetry?: () => void;
 }
 
+import React, { useState } from "react";
+
 export function CategoryTable({
   categories,
   isLoading = false,
@@ -22,10 +24,11 @@ export function CategoryTable({
   filterActive = false,
   onRetry,
 }: CategoryTableProps) {
-  const columns = ["Category Name", "Amount", "Frequency", "Priority", "Type"];
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const columns = ["Select", "Category Name", "Amount", "Frequency", "Priority", "Type"];
 
   if (isLoading) {
-    return <CategoryTableSkeleton columns={columns} />;
+    return <CategoryTableSkeleton columns={columns.slice(1)} />;
   }
 
   if (error) {
@@ -43,9 +46,20 @@ export function CategoryTable({
       categories
     );
   }
+
+  const handleSelect = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
   const data = categories.map((category) => {
     const parsedGroup = parseCategoryGroupName(category.category_group_name ?? "");
     return [
+      <input
+        type="checkbox"
+        checked={selectedIds.includes(category.id)}
+        onChange={() => handleSelect(category.id)}
+        aria-label={`Select ${category.name}`}
+      />,
       <span>{String(category.name)}</span>,
       <span>{String(category.budgeted)}</span>,
       <span>{String(parsedGroup.frequency ?? category.frequency ?? "")}</span>,
@@ -70,6 +84,30 @@ export function CategoryTable({
       }}
     >
       <Table columns={columns} data={data} />
+      <Block marginTop="scale600">
+        <button
+          type="button"
+          disabled={selectedIds.length === 0}
+          onClick={() => {
+            const selectedAmounts = categories.filter((cat) => selectedIds.includes(cat.id)).map((cat) => cat.budgeted);
+            if (selectedAmounts.length === 0) return;
+            const formula = "=" + selectedAmounts.join(" + ");
+            navigator.clipboard.writeText(formula);
+          }}
+          style={{
+            padding: "0.5rem 1rem",
+            background: "#276ef1",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            cursor: selectedIds.length === 0 ? "not-allowed" : "pointer",
+            fontWeight: 500,
+          }}
+          aria-label="Copy selected amounts to spreadsheet"
+        >
+          Copy to Spreadsheet
+        </button>
+      </Block>
     </Block>
   );
 }
