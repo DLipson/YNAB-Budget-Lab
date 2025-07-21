@@ -118,14 +118,32 @@ describe("CategoryTable", () => {
             type: "Variable",
           };
           render(<CategoryTable categories={[...categories, variableCategory]} />);
-          const input = screen.getByLabelText("Adjust amount for Dining Out") as HTMLInputElement;
+          const totalDisplay = screen.getByTestId("scenario-total");
+          expect(totalDisplay).toHaveTextContent("Total: 2150"); // 100 + 2000 + 50
+
+          // Adjust variable category
+          const adjustInputs = screen.getAllByLabelText(/Adjust amount for/i);
+          expect(adjustInputs.length).toBe(1);
           act(() => {
-            input.value = "75";
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-            input.dispatchEvent(new Event("change", { bubbles: true }));
+            const inputEl = adjustInputs[0] as HTMLInputElement;
+            inputEl.value = "75";
+            inputEl.dispatchEvent(new Event("input", { bubbles: true }));
           });
-          expect(input.value).toBe("75");
-          expect(screen.getByText(/Total:/i)).toHaveTextContent("Total: 2175");
+          expect(totalDisplay).toHaveTextContent("Total: 2175"); // 100 + 2000 + 75
+
+          // Disable scenario for variable category
+          const scenarioToggles = screen.getAllByLabelText(/Toggle scenario for/i);
+          act(() => {
+            scenarioToggles[2].click();
+          });
+          expect(totalDisplay).toHaveTextContent("Total: 2100"); // 100 + 2000
+
+          // Reset scenario
+          const resetButton = screen.getByTestId("reset-scenario");
+          act(() => {
+            resetButton.click();
+          });
+          expect(totalDisplay).toHaveTextContent("Total: 2150"); // Back to default
         });
 
         it("reset button restores defaults", () => {

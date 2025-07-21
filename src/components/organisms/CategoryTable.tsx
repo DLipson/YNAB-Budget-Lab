@@ -193,11 +193,14 @@ export function CategoryTable({
               fontWeight: 500,
             }}
             aria-label="Reset scenario planning"
+            data-testid="reset-scenario"
           >
-            Reset
+            Reset Scenario
           </button>
         </div>
-        <div style={{ fontWeight: 600, fontSize: "1.1rem" }}>Total: {total}</div>
+        <div style={{ fontWeight: 600, fontSize: "1.1rem" }} data-testid="scenario-total">
+          Total: {total}
+        </div>
       </Block>
     </Block>
   );
