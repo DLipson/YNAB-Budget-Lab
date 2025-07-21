@@ -2,13 +2,12 @@ import * as React from "react";
 import { Block } from "baseui/block";
 import { Heading, HeadingLevel } from "baseui/heading";
 import { ErrorBoundary } from "./components/molecules/ErrorBoundary";
-import { Skeleton } from "baseui/skeleton";
+import ApiKeyInput from "./components/molecules/ApiKeyInput";
 
 import { CategoryControls } from "./components/molecules/CategoryControls";
 import { CategoryTable } from "./components/organisms/CategoryTable";
 import { useCategoryFilter } from "./hooks/useCategoryFilter";
 import { useState } from "react";
-import ApiKeyInput from "./components/molecules/ApiKeyInput";
 import { useAuth } from "./hooks/useAuth";
 
 import type { Category } from "./types/ynab";
@@ -28,10 +27,16 @@ function App() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [budgetId, setBudgetId] = useState<string | null>(null);
 
-  const { token, setToken, isAuthenticated, error } = useAuth();
+  const { token, setToken, isAuthenticated, error: authError } = useAuth();
+
+  // Always call hooks before any conditional return
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[App] Loading:", loading, "Categories:", categories, "Error:", catError);
+    }
+  }, [loading, categories, catError]);
 
   React.useEffect(() => {
-    let isMounted = true;
     async function loadCategories() {
       setLoading(true);
       setCatError(null);
@@ -40,35 +45,56 @@ function App() {
         const budgets = await fetchBudgets(token);
         if (!budgets || budgets.length === 0) throw new Error("No budgets found.");
         const budgetId = budgets[0].id;
-        // Fetch categories for first budget
         setBudgetId(budgetId);
-        const cats = await fetchCategories(token, budgetId);
+      } catch (err) {
+        setCatError((err as Error).message);
+        setLoading(false);
         if (process.env.NODE_ENV === "development") {
-          console.log("[App] Categories fetched:", Array.isArray(cats) ? cats.length : cats, cats);
+          console.error("[App] Budget fetch error:", err);
         }
-        if (isMounted) setCategories(cats);
-      } catch (err: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("[App] Error loading categories:", err);
-        }
-        if (isMounted) {
-          const errorMsg =
-            typeof err === "object" && err !== null && "message" in err
-              ? (err as { message?: string }).message || "Failed to load categories."
-              : "Failed to load categories.";
-          setCatError(errorMsg);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
       }
     }
-    if (isAuthenticated && token) {
+    if (token) {
       loadCategories();
     }
+  }, [token]);
+
+  // Fetch categories when budgetId changes
+  React.useEffect(() => {
+    if (!budgetId || !token) return;
+    let isMounted = true;
+    setLoading(true);
+    setCatError(null);
+
+    async function fetchCats() {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[App] Fetching categories for budgetId:", budgetId);
+      }
+      try {
+        const cats = await fetchCategories(token as string, budgetId as string);
+        if (isMounted) {
+          setCategories(cats);
+          setLoading(false);
+          if (process.env.NODE_ENV === "development") {
+            console.log("[App] Categories loaded:", cats.length);
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          setCatError((err as Error).message);
+          setLoading(false);
+          if (process.env.NODE_ENV === "development") {
+            console.error("[App] Category fetch error:", err);
+          }
+        }
+      }
+    }
+
+    fetchCats();
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, token]);
+  }, [budgetId, token]);
 
   const filteredCategories = useCategoryFilter({
     categories,
@@ -76,18 +102,30 @@ function App() {
     sortState,
   });
 
-  // Show API key input if not authenticated
   if (!isAuthenticated) {
     return (
-      <ErrorBoundary>
-        <Block>
-          <HeadingLevel>
-            <Heading styleLevel={3}>YNAB Budget Lab</Heading>
-          </HeadingLevel>
-        </Block>
-      </ErrorBoundary>
+      <Block margin="scale600" display="flex" flexDirection="column" alignItems="center">
+        <HeadingLevel>
+          <Heading styleLevel={3}>Authenticate to Continue</Heading>
+        </HeadingLevel>
+        <div style={{ maxWidth: 400, width: "100%" }}>
+          <ErrorBoundary>
+            <React.Suspense fallback={null}>
+              <ApiKeyInput onSubmit={setToken} />
+            </React.Suspense>
+          </ErrorBoundary>
+          {authError && (
+            <Block color="negative" marginTop="scale300">
+              {authError}
+            </Block>
+          )}
+        </div>
+      </Block>
     );
   }
+
+  // Show API key input if not authenticated
+  // (handled above)
 
   return (
     <ErrorBoundary>
@@ -99,10 +137,7 @@ function App() {
         <Block marginBottom="scale400">
           <label>
             Select Category:{" "}
-            <select
-              value={selectedCategoryId || ""}
-              onChange={(e) => setSelectedCategoryId(e.target.value || null)}
-            >
+            <select value={selectedCategoryId || ""} onChange={(e) => setSelectedCategoryId(e.target.value || null)}>
               <option value="">-- Select --</option>
               {filteredCategories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -122,31 +157,12 @@ function App() {
         {selectedCategoryId && budgetId && token && (
           <Block marginTop="scale800">
             <React.Suspense fallback={<div>Loading transactions...</div>}>
-              <TransactionView
-                token={token}
-                budgetId={budgetId}
-                categoryId={selectedCategoryId}
-              />
+              <TransactionView token={token} budgetId={budgetId} categoryId={selectedCategoryId} />
             </React.Suspense>
           </Block>
         )}
       </Block>
     </ErrorBoundary>
   );
-export default App;
-
-  // Main app UI after authentication
-  return (
-    <ErrorBoundary>
-      <Block>
-        <Block>
-          <HeadingLevel>
-            <Heading level={3} margin="scale600">
-              YNAB Budget Lab
-            </Heading>
-          </HeadingLevel>
-        </Block>
-        <Block as="main">
-          {loading ? (
-
+}
 export default App;
