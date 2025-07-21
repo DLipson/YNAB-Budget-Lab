@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Block } from "baseui/block";
 import { Heading, HeadingLevel } from "baseui/heading";
-import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ErrorBoundary } from "./components/molecules/ErrorBoundary";
 import { Skeleton } from "baseui/skeleton";
 
-import { CategoryControls } from "./components/CategoryControls";
-import { CategoryTable } from "./components/CategoryTable";
+import { CategoryControls } from "./components/molecules/CategoryControls";
+import { CategoryTable } from "./components/organisms/CategoryTable";
 import { useCategoryFilter } from "./hooks/useCategoryFilter";
 import { useState } from "react";
 

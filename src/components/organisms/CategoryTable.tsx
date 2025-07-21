@@ -1,11 +1,11 @@
 import { Table } from "baseui/table";
 import { Block } from "baseui/block";
-import { parseCategoryGroupName } from "../utils/categoryParser";
-import { CategoryTableSkeleton } from "../components/molecules/CategoryTableSkeleton";
-import { CategoryError } from "../components/molecules/CategoryError";
-import { CategoryEmptyState } from "../components/molecules/CategoryEmptyState";
+import { parseCategoryGroupName } from "../../utils/categoryParser";
+import { CategoryTableSkeleton } from "../molecules/CategoryTableSkeleton";
+import { CategoryError } from "../molecules/CategoryError";
+import { CategoryEmptyState } from "../molecules/CategoryEmptyState";
 
-import type { Category } from "../types/ynab";
+import type { Category } from "../../types/ynab";
 
 interface CategoryTableProps {
   categories: Category[];
