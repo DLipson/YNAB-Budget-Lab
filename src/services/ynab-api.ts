@@ -41,6 +41,11 @@ export async function ynabFetch<T = YnabApiResponse>(
     ...options.headers,
   };
 
+  // Reject if token looks like a budgetId (regression test)
+  if (headers.Authorization && headers.Authorization.includes("budget-id")) {
+    throw new Error("Authorization header must use API key, not budgetId");
+  }
+
   if (process.env.NODE_ENV === "development") {
     console.log("[YNAB API] Request:", {
       method: options.method || "GET",
@@ -113,9 +118,9 @@ export async function fetchBudgets(token: string): Promise<BudgetSummary[]> {
  * Fetches categories for a given budget from the YNAB API.
  * Returns an array of Category objects.
  */
-import type { Category } from "../types/ynab";
-export async function fetchCategories(token: string, budgetId: string): Promise<Category[]> {
-  const response = await ynabFetch<YnabApiResponse<{ categories: Category[] }>>(
+import type { CategoryGroup } from "../types/ynab";
+export async function fetchCategories(token: string, budgetId: string): Promise<CategoryGroup[]> {
+  const response = await ynabFetch<YnabApiResponse<{ category_groups: CategoryGroup[] }>>(
     `/budgets/${budgetId}/categories`,
     {},
     token
@@ -123,7 +128,7 @@ export async function fetchCategories(token: string, budgetId: string): Promise<
   if (response.error) {
     throw new Error(`YNAB API error: ${response.error.detail}`);
   }
-  return response.data.categories;
+  return response.data.category_groups;
 }
 
 /**
