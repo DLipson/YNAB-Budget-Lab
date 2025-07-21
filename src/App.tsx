@@ -12,6 +12,7 @@ import ApiKeyInput from "./components/molecules/ApiKeyInput";
 import { useAuth } from "./hooks/useAuth";
 
 import type { Category } from "./types/ynab";
+import { TransactionView } from "./components/organisms/TransactionView";
 
 /* mockCategories removed */
 
@@ -24,6 +25,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [catError, setCatError] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [budgetId, setBudgetId] = useState<string | null>(null);
 
   const { token, setToken, isAuthenticated, error } = useAuth();
 
@@ -38,6 +41,7 @@ function App() {
         if (!budgets || budgets.length === 0) throw new Error("No budgets found.");
         const budgetId = budgets[0].id;
         // Fetch categories for first budget
+        setBudgetId(budgetId);
         const cats = await fetchCategories(token, budgetId);
         if (process.env.NODE_ENV === "development") {
           console.log("[App] Categories fetched:", Array.isArray(cats) ? cats.length : cats, cats);
@@ -78,22 +82,58 @@ function App() {
       <ErrorBoundary>
         <Block>
           <HeadingLevel>
-            <Heading level={3} margin="scale600">
-              YNAB Budget Lab
-            </Heading>
+            <Heading styleLevel={3}>YNAB Budget Lab</Heading>
           </HeadingLevel>
-          <Block marginTop="scale600" maxWidth="400px">
-            <ApiKeyInput onSubmit={setToken} />
-            {error && (
-              <Block color="negative" marginTop="scale300">
-                {error}
-              </Block>
-            )}
-          </Block>
         </Block>
       </ErrorBoundary>
     );
   }
+
+  return (
+    <ErrorBoundary>
+      <Block>
+        <HeadingLevel>
+          <Heading styleLevel={3}>YNAB Budget Lab</Heading>
+        </HeadingLevel>
+        <CategoryControls />
+        <Block marginBottom="scale400">
+          <label>
+            Select Category:{" "}
+            <select
+              value={selectedCategoryId || ""}
+              onChange={(e) => setSelectedCategoryId(e.target.value || null)}
+            >
+              <option value="">-- Select --</option>
+              {filteredCategories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </Block>
+        <CategoryTable
+          categories={filteredCategories}
+          isLoading={loading}
+          error={catError}
+          filterActive={!!Object.keys(filterState).length}
+          onRetry={() => window.location.reload()}
+        />
+        {selectedCategoryId && budgetId && token && (
+          <Block marginTop="scale800">
+            <React.Suspense fallback={<div>Loading transactions...</div>}>
+              <TransactionView
+                token={token}
+                budgetId={budgetId}
+                categoryId={selectedCategoryId}
+              />
+            </React.Suspense>
+          </Block>
+        )}
+      </Block>
+    </ErrorBoundary>
+  );
+export default App;
 
   // Main app UI after authentication
   return (
@@ -108,23 +148,5 @@ function App() {
         </Block>
         <Block as="main">
           {loading ? (
-            <Skeleton animation height="48px" width="100%" overrides={{ Root: { style: { marginBottom: "2rem" } } }} />
-          ) : (
-            <div style={{ marginBottom: "2rem" }}>
-              {/* Controls UI */}
-              <CategoryControls />
-            </div>
-          )}
-          {/* Table UI */}
-          <CategoryTable
-            categories={filteredCategories as Category[]}
-            isLoading={loading}
-            error={catError ?? undefined}
-          />
-        </Block>
-      </Block>
-    </ErrorBoundary>
-  );
-}
 
 export default App;

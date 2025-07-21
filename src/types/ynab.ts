@@ -54,3 +54,25 @@ export interface CategoryGroup {
 export interface CategoryGroupsResponse {
   category_groups: CategoryGroup[];
 }
+
+// YNAB API: Transaction response
+export interface Transaction {
+  id: string;
+  date: string;
+  amount: number;
+  memo?: string;
+  cleared: "cleared" | "uncleared" | "reconciled";
+  approved: boolean;
+  account_id: string;
+  payee_id?: string;
+  category_id?: string;
+  transfer_account_id?: string;
+  import_id?: string;
+  deleted: boolean;
+  // Add more fields as needed
+}
+
+export interface TransactionsResponse {
+  transactions: Transaction[];
+  server_knowledge: number;
+}

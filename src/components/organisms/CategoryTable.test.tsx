@@ -187,7 +187,27 @@ describe("CategoryTable", () => {
         });
       }
     });
-    button.click();
+    const selectCheckboxes = screen
+      .getAllByRole("checkbox")
+      .filter((cb) => cb.getAttribute("aria-label")?.startsWith("Select"));
+    // Reset scenario planning to defaults before selecting
+    const resetButton = screen.getByTestId("reset-scenario");
+    // Reset, select, enable toggles, and copy in one act block
+    const selectedLabels = selectCheckboxes.map((cb) => cb.getAttribute("aria-label")?.replace("Select ", ""));
+    act(() => {
+      resetButton.click();
+      selectCheckboxes.forEach((cb) => cb.click());
+      selectedLabels.forEach((label) => {
+        const toggle = screen.getByLabelText(`Toggle scenario for ${label}`);
+        if (!(toggle as HTMLInputElement).checked) {
+          (toggle as HTMLInputElement).click();
+        }
+      });
+      // Assert total before copying
+      const totalDisplay = screen.getByTestId("scenario-total");
+      expect(totalDisplay).toHaveTextContent("Total: 2100");
+      button.click();
+    });
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith("=100 + 2000");
   });
 
