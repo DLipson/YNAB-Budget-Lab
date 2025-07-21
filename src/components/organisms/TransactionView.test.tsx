@@ -1,11 +1,11 @@
-import React from "react";
+import { act } from "@testing-library/react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { TransactionView } from "./TransactionView";
 
-const mockFetchTransactions = jest.fn();
+const mockFetchTransactions = vi.fn();
 
-jest.mock("../../services/ynab-api", () => ({
-  fetchTransactions: (...args: any[]) => mockFetchTransactions(...args),
+vi.mock("../../services/ynab-api", () => ({
+  fetchTransactions: (...args: unknown[]) => mockFetchTransactions(...args),
 }));
 
 const token = "test-token";
@@ -58,25 +58,56 @@ describe("TransactionView", () => {
   });
 
   it("handles paging", async () => {
+    // Initial load: pageSize=25, page=1
+    mockFetchTransactions.mockResolvedValueOnce({
+      transactions: [transactions[0], transactions[1]],
+      total: 2,
+    });
+    // After pageSize change: pageSize=1, page=1
     mockFetchTransactions.mockResolvedValueOnce({
       transactions: [transactions[0]],
       total: 2,
     });
+    // After clicking Next: pageSize=1, page=2
     mockFetchTransactions.mockResolvedValueOnce({
       transactions: [transactions[1]],
       total: 2,
     });
+    // After clicking Previous: pageSize=1, page=1
+    mockFetchTransactions.mockResolvedValueOnce({
+      transactions: [transactions[0]],
+      total: 2,
+    });
 
     render(<TransactionView token={token} budgetId={budgetId} categoryId={categoryId} />);
+    // Wait for initial data to load
+    await waitFor(() => {
+      expect(screen.getByText("Groceries")).toBeInTheDocument();
+    });
+
+    // Set pageSize=1 to force two pages
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/Page Size/i), { target: { value: "1" } });
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Groceries")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText("Next"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Next"));
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Coffee")).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("Previous"));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Groceries")).toBeInTheDocument();
     });
   });
 

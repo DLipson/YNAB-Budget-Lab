@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Block } from "baseui/block";
 import Button from "../atoms/Button";
 import Input from "../atoms/Input";
@@ -52,7 +52,12 @@ export function TransactionView({ token, budgetId, categoryId }: TransactionView
       <Block marginBottom="scale400">
         <label>
           Page Size:{" "}
-          <Input type="number" value={String(pageSize)} onChange={(e) => setPageSize(Number(e.target.value))} />
+          <Input
+            type="number"
+            value={String(pageSize)}
+            aria-label="Page Size"
+            onChange={(e) => setPageSize(Number(e.target.value))}
+          />
         </label>
       </Block>
       <Block display="flex" alignItems="center" marginBottom="scale400">
